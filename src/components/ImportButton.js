@@ -1,9 +1,38 @@
-import React, { useState } from 'react';
 import * as XLSX from 'xlsx';
-import StatusTable from './StatusTable';
+import moment from 'moment-timezone';
 
-const ImportButton = ({ shouldShowTestButton }) => {
-  const [fileData, setFileData] = useState(null);
+const ImportButton = ({ shouldShowTestButton, setPlayers }) => {
+  function getSortedPlayers(fileData) {
+    const validPlayers = fileData.filter(
+      (d) =>
+        d['Checked In'] !== undefined &&
+        (d['Checked In'] === 'Yes' || d['Checked In'] === 'No')
+    );
+    const simplifiedPlayers = validPlayers.map((d, i) => ({
+      id: '00' + i,
+      name: d.Name,
+      checkedIn: d['Checked In'] === 'Yes' ? 'Y' : 'N',
+      checkInDate:
+        d['Check-in Date'] === ''
+          ? ''
+          : moment(d['Check-in Date'], 'YYYY-MM-DD hh:mmA Z').toDate(),
+      noGamePlayed: 0
+    }));
+    const sortedPlayers = simplifiedPlayers.sort((a, b) => {
+      if (a.checkInDate === '' && b.checkInDate === '') {
+        return 0; // both empty, keep original order
+      }
+      if (a.checkInDate === '') {
+        return 1; // a is empty, b comes first
+      }
+      if (b.checkInDate === '') {
+        return -1; // b is empty, a comes first
+      }
+      // Sort by checkInDate for valid dates
+      return a.checkInDate - b.checkInDate;
+    });
+    return sortedPlayers;
+  }
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -14,16 +43,17 @@ const ImportButton = ({ shouldShowTestButton }) => {
         const workbook = XLSX.read(data, { type: 'array' });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(sheet);
-        setFileData(jsonData);
+        const fileData = XLSX.utils.sheet_to_json(sheet);
+        const sortedPlayers = getSortedPlayers(fileData);
+        setPlayers(sortedPlayers);
       };
       reader.readAsArrayBuffer(file);
     }
   };
   const handleTestFile = async () => {
     const response = await fetch('/data/data_01.xlsx');
-    const fileData = await response.blob();
-    const testFile = new File([fileData], 'testData.xlsx', {
+    const fileBlob = await response.blob();
+    const testFile = new File([fileBlob], 'testData.xlsx', {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     });
     const fakeEvent = {
@@ -51,11 +81,6 @@ const ImportButton = ({ shouldShowTestButton }) => {
         <button onClick={handleTestFile}>
           <label style={{ cursor: 'pointer' }}>Test Excel</label>
         </button>
-      )}
-      {fileData && (
-        <div>
-          <StatusTable fileData={fileData} />
-        </div>
       )}
     </div>
   );
