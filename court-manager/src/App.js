@@ -7,7 +7,7 @@ function App() {
     <div className='App'>
       <header className='App-header'>
         <h1>COURT MANAGER</h1>
-        <ImportButton></ImportButton>
+        <ImportButton shouldShowTestButton={true}></ImportButton>
       </header>
     </div>
   );
