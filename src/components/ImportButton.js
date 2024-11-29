@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import * as XLSX from 'xlsx';
+import StatusTable from './StatusTable';
 
-const ImportButton = () => {
+const ImportButton = ({ shouldShowTestButton }) => {
   const [fileData, setFileData] = useState(null);
 
   const handleFileChange = (e) => {
@@ -15,10 +16,22 @@ const ImportButton = () => {
         const sheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(sheet);
         setFileData(jsonData);
-        console.log(jsonData);
       };
       reader.readAsArrayBuffer(file);
     }
+  };
+  const handleTestFile = async () => {
+    const response = await fetch('/data/data_01.xlsx');
+    const fileData = await response.blob();
+    const testFile = new File([fileData], 'testData.xlsx', {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+    const fakeEvent = {
+      target: {
+        files: [testFile]
+      }
+    };
+    handleFileChange(fakeEvent);
   };
   return (
     <div>
@@ -34,9 +47,14 @@ const ImportButton = () => {
         accept='.xlsx, .xls'
         onChange={handleFileChange}
       />
+      {shouldShowTestButton && (
+        <button onClick={handleTestFile}>
+          <label style={{ cursor: 'pointer' }}>Test Excel</label>
+        </button>
+      )}
       {fileData && (
         <div>
-          <pre>{JSON.stringify(fileData, null, 2)}</pre>
+          <StatusTable fileData={fileData} />
         </div>
       )}
     </div>
