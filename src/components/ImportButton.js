@@ -16,7 +16,7 @@ const ImportButton = ({ shouldShowTestButton, setPlayers }) => {
         d['Check-in Date'] === ''
           ? ''
           : moment(d['Check-in Date'], 'YYYY-MM-DD hh:mmA Z').toDate(),
-      noGamePlayed: 0
+      noGamePlayed: d['Checked In'] === 'Yes' ? '0' : ''
     }));
     const sortedPlayers = simplifiedPlayers.sort((a, b) => {
       if (a.checkInDate === '' && b.checkInDate === '') {
