@@ -7,6 +7,9 @@ function StatusTable({ players }) {
   //   </div>
   // );
   function getTime(checkInDate) {
+    if (checkInDate === '') {
+      return '';
+    }
     const date = new Date(checkInDate);
     const options = {
       hour: '2-digit',
@@ -15,8 +18,13 @@ function StatusTable({ players }) {
     };
     return date.toLocaleTimeString('en-US', options);
   }
+
+  const handleRandomize = () => {};
+
   return (
     <div>
+      <span style={{ marginRight: '10px' }}>RANDOMIZE?</span>
+      <button onClick={handleRandomize}>GO</button>
       <table>
         <thead>
           <tr>
