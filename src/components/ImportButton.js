@@ -1,4 +1,5 @@
 import * as XLSX from 'xlsx';
+import React, { Component }  from 'react';
 import moment from 'moment-timezone';
 
 const ImportButton = ({ shouldShowTestButton, setPlayers }) => {
@@ -16,7 +17,7 @@ const ImportButton = ({ shouldShowTestButton, setPlayers }) => {
         d['Check-in Date'] === ''
           ? ''
           : moment(d['Check-in Date'], 'YYYY-MM-DD hh:mmA Z').toDate(),
-      noGamePlayed: d['Checked In'] === 'Yes' ? '0' : ''
+      playingCount: d['Checked In'] === 'Yes' ? '0' : ''
     }));
     const sortedPlayers = simplifiedPlayers.sort((a, b) => {
       if (a.checkInDate === '' && b.checkInDate === '') {
