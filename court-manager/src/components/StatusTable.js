@@ -1,25 +1,11 @@
 import React, { useState } from 'react';
 
-function StatusTable({ players, setPlayers, onCourtAssign }) {
+function StatusTable({ players, setPlayers }) {
   // return (
   //   <div>
   //     <pre>{JSON.stringify(players, null, 2)}</pre>
   //   </div>
   // );
-
-  // The information for view
-  const [displayedPlayers, setDisplayedPlayers] = useState(players);
-  const [currentStartIndex, setCurrentStartIndex] = useState(0);
-
-  const handleRandomizeClick = () => {
-    if (players.length === 0) {
-      console.error('No players are checked in!');
-      return;
-    }
-
-    handleRandomize();
-  };
-
   function getTime(checkInDate) {
     if (checkInDate === '') {
       return '';
@@ -35,9 +21,9 @@ function StatusTable({ players, setPlayers, onCourtAssign }) {
 
   const handleRandomize = (courtNumbers = [1, 2]) => { // courtNumber default is 4
     // Checking the courtNumbers is array
-    if (!Array.isArray(courtNumbers) || courtNumbers.length === 0) {
+    if (!Array.isArray(courtNumbers)) {
       console.error('Invalid courtNumbers. Using default: [1, 2]');
-      courtNumbers = [1, 2]; // 기본값
+      courtNumbers = [1, 2]; // Default
     }
 
     // Filtering players who is checked in only
@@ -45,7 +31,7 @@ function StatusTable({ players, setPlayers, onCourtAssign }) {
       player.checkedIn === 'Y');
     
     if (playersCheckedIn.length === 0) {
-      console.log('No players are checked in!');
+      console.error('No players are checked in!');
       return;
     }
 
@@ -84,26 +70,27 @@ function StatusTable({ players, setPlayers, onCourtAssign }) {
     // Assigning 4 players on each court
     shuffledBatch.forEach((player, index) => {
       const courtIndex = courtNumbers[index % courtNumbers.length];
-      courtAssignments[courtIndex].push(player.name);
+      courtAssignments[courtIndex].push(player);
     });
     
     setPlayers(updatedPlayers); 
     setCurrentStartIndex((currentStartIndex + batchSize) % playersCheckedIn.length);
     
-    if (typeof onCourtAssign === 'function') {
-      onCourtAssign(courtAssignments); 
-    } else {
-      console.error('onCourtAssign is not a function');
-    }
-
     console.log('Court Assignments:', courtAssignments);
     console.log('Next Start Index:', currentStartIndex); // 디버깅용 로그
+  };
+
+  const handleShowList = () => {
+    setDisplayedPlayers(players); // 모든 플레이어를 표시
   };
 
   return (
     <div>
       <span style={{ marginRight: '10px' }}>RANDOMIZE?</span>
-      <button onClick={() => handleRandomize([1, 2, 3])}>GO</button>
+      <button onClick={handleRandomize}>GO</button>
+      <button onClick={handleShowList} style={{ marginLeft: '10px' }}>
+        SHOW LIST
+      </button>
       <table>
         <thead>
           <tr>
