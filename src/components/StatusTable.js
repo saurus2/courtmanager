@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function StatusTable({ players, setPlayers }) {
+function StatusTable({ players, setPlayers, onCourtAssign }) {
   // return (
   //   <div>
   //     <pre>{JSON.stringify(players, null, 2)}</pre>
@@ -9,7 +9,16 @@ function StatusTable({ players, setPlayers }) {
 
   // The information for view
   const [displayedPlayers, setDisplayedPlayers] = useState(players);
-  const [currentStartIndex, setCurrentStartIndex] = useState(0); // The variable for memorizing index for players
+  const [currentStartIndex, setCurrentStartIndex] = useState(0);
+
+  const handleRandomizeClick = () => {
+    if (players.length === 0) {
+      console.error('No players are checked in!');
+      return;
+    }
+
+    handleRandomize();
+  };
 
   function getTime(checkInDate) {
     if (checkInDate === '') {
@@ -26,9 +35,9 @@ function StatusTable({ players, setPlayers }) {
 
   const handleRandomize = (courtNumbers = [1, 2]) => { // courtNumber default is 4
     // Checking the courtNumbers is array
-    if (!Array.isArray(courtNumbers)) {
+    if (!Array.isArray(courtNumbers) || courtNumbers.length === 0) {
       console.error('Invalid courtNumbers. Using default: [1, 2]');
-      courtNumbers = [1, 2]; // Default
+      courtNumbers = [1, 2]; // 기본값
     }
 
     // Filtering players who is checked in only
@@ -36,7 +45,7 @@ function StatusTable({ players, setPlayers }) {
       player.checkedIn === 'Y');
     
     if (playersCheckedIn.length === 0) {
-      console.error('No players are checked in!');
+      console.log('No players are checked in!');
       return;
     }
 
@@ -75,27 +84,26 @@ function StatusTable({ players, setPlayers }) {
     // Assigning 4 players on each court
     shuffledBatch.forEach((player, index) => {
       const courtIndex = courtNumbers[index % courtNumbers.length];
-      courtAssignments[courtIndex].push(player);
+      courtAssignments[courtIndex].push(player.name);
     });
     
     setPlayers(updatedPlayers); 
     setCurrentStartIndex((currentStartIndex + batchSize) % playersCheckedIn.length);
     
+    if (typeof onCourtAssign === 'function') {
+      onCourtAssign(courtAssignments); 
+    } else {
+      console.error('onCourtAssign is not a function');
+    }
+
     console.log('Court Assignments:', courtAssignments);
     console.log('Next Start Index:', currentStartIndex); // 디버깅용 로그
-  };
-
-  const handleShowList = () => {
-    setDisplayedPlayers(players); // 모든 플레이어를 표시
   };
 
   return (
     <div>
       <span style={{ marginRight: '10px' }}>RANDOMIZE?</span>
-      <button onClick={handleRandomize}>GO</button>
-      <button onClick={handleShowList} style={{ marginLeft: '10px' }}>
-        SHOW LIST
-      </button>
+      <button onClick={() => handleRandomize([1, 2, 3])}>GO</button>
       <table>
         <thead>
           <tr>
