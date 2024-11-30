@@ -15,7 +15,7 @@ function App() {
           shouldShowTestButton={true}
           setPlayers={setPlayers}
         ></ImportButton>
-        <div>{players && <StatusTable players={players} />}</div>
+        <div>{players && <StatusTable players={players} setPlayers={setPlayers} />}</div>
       </header>
     </div>
   );
