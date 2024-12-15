@@ -45,7 +45,12 @@ const ImportButton = ({ shouldShowTestButton, setPlayers }) => {
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
         const fileData = XLSX.utils.sheet_to_json(sheet);
-        const sortedPlayers = getSortedPlayers(fileData);
+
+        const filteredData = fileData.filter(
+          (player) => player['Checked In'] === 'Yes'
+        );
+
+        const sortedPlayers = getSortedPlayers(filteredData);
         setPlayers(sortedPlayers);
       };
       reader.readAsArrayBuffer(file);
