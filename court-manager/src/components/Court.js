@@ -1,14 +1,14 @@
 import React from 'react';
 
-export default function Court({ num, isSelected, onClick }) {
+export default function Court({ i, isSelected, onClick }) {
   return (
     <div
-      onClick={onClick}
-      className={`w-32 h-32 rounded-lg border-2 flex items-center justify-center text-white font-bold text-xl cursor-pointer
-    ${isSelected ? 'bg-blue-700' : 'bg-blue-500'}  
-    hover:bg-blue-600 transition duration-200`}
+      onClick={() => onClick(i)}
+      className={`w-32 h-32 rounded-lg border border-black flex items-center justify-center  font-bold text-xl cursor-pointer text-black
+    ${isSelected ? 'bg-blue-500' : 'bg-blue-200 '}  
+    hover:bg-blue-500 `}
     >
-      Court {num}
+      Court {i + 1}
     </div>
   );
 }
