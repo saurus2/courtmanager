@@ -20,19 +20,14 @@ function App() {
   };
 
   return (
-    <div className='App'>
-      <header className='App-header'>
-        <h1>COURT MANAGER</h1>
-        <CourtSelection
-          numTotCourts={8}
-          onCourtSelect={setSelectedCourts}
-          courtAssignments={courtAssignments}
-        ></CourtSelection>
-        <ImportButton
-          shouldShowTestButton={true}
-          setPlayers={setPlayers}
-        ></ImportButton>
-        <div>
+    <div className='App p-8'>
+      <h1 className='text-4xl font-bold text-blue-500'>COURT MANAGER</h1>
+      <div className='flex'>
+        <div className='w-1/3 p-4'>
+          <ImportButton
+            shouldShowTestButton={true}
+            setPlayers={setPlayers}
+          ></ImportButton>
           {players && (
             <StatusTable
               players={players}
@@ -41,7 +36,14 @@ function App() {
             />
           )}
         </div>
-      </header>
+        <div className='w-2/3 p-4'>
+          <CourtSelection
+            numTotCourts={8}
+            onCourtSelect={setSelectedCourts}
+            courtAssignments={courtAssignments}
+          ></CourtSelection>
+        </div>
+      </div>
     </div>
   );
 }

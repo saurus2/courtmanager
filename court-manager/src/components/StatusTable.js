@@ -33,7 +33,8 @@ function StatusTable({ players, setPlayers, onCourtAssign }) {
     return date.toLocaleTimeString('en-US', options);
   }
 
-  const handleRandomize = (courtNumbers = [1, 2]) => { // courtNumber default is 4
+  const handleRandomize = (courtNumbers = [1, 2]) => {
+    // courtNumber default is 4
     // Checking the courtNumbers is array
     if (!Array.isArray(courtNumbers) || courtNumbers.length === 0) {
       console.error('Invalid courtNumbers. Using default: [1, 2]');
@@ -41,9 +42,10 @@ function StatusTable({ players, setPlayers, onCourtAssign }) {
     }
 
     // Filtering players who is checked in only
-    const playersCheckedIn = players.filter((player) => 
-      player.checkedIn === 'Y');
-    
+    const playersCheckedIn = players.filter(
+      (player) => player.checkedIn === 'Y'
+    );
+
     if (playersCheckedIn.length === 0) {
       console.log('No players are checked in!');
       return;
@@ -61,18 +63,26 @@ function StatusTable({ players, setPlayers, onCourtAssign }) {
     const batchSize = courtNumbers.length * 4;
 
     // Calculating index of the end of group
-    const endIndex = Math.min(currentStartIndex + batchSize, playersCheckedIn.length);
+    const endIndex = Math.min(
+      currentStartIndex + batchSize,
+      playersCheckedIn.length
+    );
 
     // The player group for game now
-    const currentBatch = playersCheckedIn.slice(currentStartIndex, endIndex).concat(
-      playersCheckedIn.slice(0, Math.max(0, currentStartIndex + batchSize - playersCheckedIn.length))
-    );
+    const currentBatch = playersCheckedIn
+      .slice(currentStartIndex, endIndex)
+      .concat(
+        playersCheckedIn.slice(
+          0,
+          Math.max(0, currentStartIndex + batchSize - playersCheckedIn.length)
+        )
+      );
 
     const updatedPlayers = players.map((player) => {
       if (currentBatch.includes(player)) {
         return {
           ...player,
-          playingCount: (parseInt(player.playingCount, 10) || 0) + 1,
+          playingCount: (parseInt(player.playingCount, 10) || 0) + 1
         };
       }
       return { ...player };
@@ -86,12 +96,14 @@ function StatusTable({ players, setPlayers, onCourtAssign }) {
       const courtIndex = courtNumbers[index % courtNumbers.length];
       courtAssignments[courtIndex].push(player.name);
     });
-    
-    setPlayers(updatedPlayers); 
-    setCurrentStartIndex((currentStartIndex + batchSize) % playersCheckedIn.length);
-    
+
+    setPlayers(updatedPlayers);
+    setCurrentStartIndex(
+      (currentStartIndex + batchSize) % playersCheckedIn.length
+    );
+
     if (typeof onCourtAssign === 'function') {
-      onCourtAssign(courtAssignments); 
+      onCourtAssign(courtAssignments);
     } else {
       console.error('onCourtAssign is not a function');
     }
