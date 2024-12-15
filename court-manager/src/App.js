@@ -2,22 +2,21 @@ import './App.css';
 import React, { useState } from 'react';
 import ImportButton from './components/ImportButton';
 import StatusTable from './components/StatusTable';
-import CourtSelection from './components/CourtSelection';
+import Assignment from './components/Assignment';
 
 function App() {
   const [players, setPlayers] = useState([]);
-  const [courtAssignments, setCourtAssignments] = useState({});
-  const [selectedCourts, setSelectedCourts] = useState([]);
+  const [assignments, setAssignments] = useState({});
 
   // updating court information
-  const handleRandomize = (assignments) => {
-    if (players.length === 0) {
-      console.error('No players are available!');
-      return;
-    }
+  // const handleRandomize = (assignments) => {
+  //   if (players.length === 0) {
+  //     console.error('No players are available!');
+  //     return;
+  //   }
 
-    setCourtAssignments(assignments);
-  };
+  //   setCourtAssignments(assignments);
+  // };
 
   return (
     <div className='App p-8'>
@@ -32,16 +31,17 @@ function App() {
             <StatusTable
               players={players}
               setPlayers={setPlayers}
-              onCourtAssign={handleRandomize}
+              // onCourtAssign={handleRandomize}
             />
           )}
         </div>
         <div className='w-2/3 p-4'>
-          <CourtSelection
+          <Assignment
             numTotCourts={8}
-            onCourtSelect={setSelectedCourts}
-            courtAssignments={courtAssignments}
-          ></CourtSelection>
+            players={players}
+            assignments={assignments}
+            setAssignments={setAssignments}
+          ></Assignment>
         </div>
       </div>
     </div>
