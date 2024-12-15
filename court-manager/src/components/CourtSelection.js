@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 
-function CourtSelection({ numTotCourts, onCourtSelect, courtAssignments= {} }) {
+function CourtSelection({
+  numTotCourts,
+  onCourtSelect,
+  courtAssignments = {}
+}) {
   const [selectedSquares, setSelectedSquares] = useState(
     Array({ numTotCourts }).fill(false)
   );
@@ -25,7 +29,7 @@ function CourtSelection({ numTotCourts, onCourtSelect, courtAssignments= {} }) {
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
         gap: '20px',
-        padding: '20px',
+        padding: '20px'
       }}
     >
       {Array.from({ length: numTotCourts }, (_, i) => (
@@ -48,12 +52,20 @@ function CourtSelection({ numTotCourts, onCourtSelect, courtAssignments= {} }) {
             padding: '5px'
           }}
         >
-          <div style={{ marginBottom: '10px', fontSize: '18px', fontWeight: 'bold' }}>
+          <div
+            style={{
+              marginBottom: '10px',
+              fontSize: '18px',
+              fontWeight: 'bold'
+            }}
+          >
             Court {i + 1}
           </div>
           <div>
             {courtAssignments[i + 1] && courtAssignments[i + 1].length > 0 ? (
-              courtAssignments[i + 1].map((name, idx) => <div key={idx}>{name}</div>)
+              courtAssignments[i + 1].map((name, idx) => (
+                <div key={idx}>{name}</div>
+              ))
             ) : (
               <div>No Players</div>
             )}
