@@ -75,16 +75,6 @@ function StatusTable({ players, setPlayers, onCourtAssign }) {
       courtNumbers = [1, 2]; // 기본값
     }
 
-    // Filtering players who is checked in only
-    const playersCheckedIn = players.filter(
-      (player) => player.checkedIn === 'Y'
-    );
-
-    if (playersCheckedIn.length === 0) {
-      console.log('No players are checked in!');
-      return;
-    }
-
     // JSON object
     const courtAssignments = {};
 
@@ -99,18 +89,13 @@ function StatusTable({ players, setPlayers, onCourtAssign }) {
     // Calculating index of the end of group
     const endIndex = Math.min(
       currentStartIndex + batchSize,
-      playersCheckedIn.length
+      players.length
     );
 
     // The player group for game now
-    const currentBatch = playersCheckedIn
-      .slice(currentStartIndex, endIndex)
-      .concat(
-        playersCheckedIn.slice(
-          0,
-          Math.max(0, currentStartIndex + batchSize - playersCheckedIn.length)
-        )
-      );
+    const currentBatch = players
+    .slice(currentStartIndex, endIndex)
+    .concat(players.slice(0, Math.max(0, currentStartIndex + batchSize - players.length)));
 
     const updatedPlayers = players.map((player) => {
       if (currentBatch.includes(player)) {
@@ -133,7 +118,7 @@ function StatusTable({ players, setPlayers, onCourtAssign }) {
 
     setPlayers(updatedPlayers);
     setCurrentStartIndex(
-      (currentStartIndex + batchSize) % playersCheckedIn.length
+      (currentStartIndex + batchSize) % players.length
     );
 
     if (typeof onCourtAssign === 'function') {
@@ -143,6 +128,7 @@ function StatusTable({ players, setPlayers, onCourtAssign }) {
     }
 
     console.log('Court Assignments:', courtAssignments);
+    console.log(players);
     console.log('Next Start Index:', currentStartIndex); // 디버깅용 로그
   };
 
