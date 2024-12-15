@@ -6,6 +6,12 @@ function StatusTable({ players, setPlayers, onCourtAssign }) {
   const [currentStartIndex, setCurrentStartIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false); // 모달 창 상태
   const [newPlayerName, setNewPlayerName] = useState(''); // 새 플레이어 이름
+  const [selectedPlayerId, setSelectedPlayerId] = useState(null);
+
+  // Click player in the list handler
+  const handlePlayerClick = (playerId) => {
+    setSelectedPlayerId((prevId) => (prevId === playerId ? null : playerId));
+  };
 
   // Open adding modal and close
   const openModal = () => setIsModalOpen(true);
@@ -21,7 +27,14 @@ function StatusTable({ players, setPlayers, onCourtAssign }) {
       return;
     }
 
+    // The last player checked-in ID
+    const maxId = players.reduce((max, player) => {
+      const idNum = parseInt(player.id, 10); // 숫자로 변환
+      return idNum > max ? idNum : max;
+    }, 0);
+
     const newPlayer = {
+      id: (maxId + 1).toString(), // keep to add player with ID continuosly
       name: newPlayerName.trim(),
       checkedIn: 'Y',
       checkInDate: new Date(), // Current time adding
@@ -221,9 +234,17 @@ function StatusTable({ players, setPlayers, onCourtAssign }) {
         <tbody>
           {players.filter(player => player.checkedIn === 'Y').length > 0 ? (
             players
-              .filter(player => player.checkedIn === 'Y')
-              .map((player, index) => (
-                <tr key={index} className="hover:bg-gray-100">
+              .filter((player) => player.checkedIn === 'Y')
+              .map((player) => (
+                <tr 
+                  key={player.id} 
+                  onClick={() => handlePlayerClick(player.id)} // Add click event
+                  className={`cursor-pointer ${
+                    selectedPlayerId === player.id
+                      ? 'bg-blue-100 border-blue-500' // 선택된 플레이어 스타일
+                      : 'hover:bg-gray-100'
+                  }`}
+                >
                   <td className="px-4 py-2">{player.name}</td> {/* 이름 표시 */}
                   <td className="px-4 py-2">{player.checkedIn}</td> {/* 체크인 여부 */}
                   <td className="px-4 py-2">{player.playingCount || 0}</td> {/* 게임 횟수 */}
