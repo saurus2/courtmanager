@@ -5,9 +5,9 @@ import StatusTable from './components/StatusTable';
 import CourtSelection from './components/CourtSelection';
 
 function App() {
-  const [players, setPlayers] = useState([]); 
-  const [courtAssignments, setCourtAssignments] = useState({}); 
-  const [selectedCourts, setSelectedCourts] = useState([]); 
+  const [players, setPlayers] = useState([]);
+  const [courtAssignments, setCourtAssignments] = useState({});
+  const [selectedCourts, setSelectedCourts] = useState([]);
 
   // updating court information
   const handleRandomize = (assignments) => {
@@ -16,28 +16,28 @@ function App() {
       return;
     }
 
-    setCourtAssignments(assignments); 
+    setCourtAssignments(assignments);
   };
 
   return (
     <div className='App'>
       <header className='App-header'>
         <h1>COURT MANAGER</h1>
-        <CourtSelection 
-          numTotCourts={17}
+        <CourtSelection
+          numTotCourts={8}
           onCourtSelect={setSelectedCourts}
           courtAssignments={courtAssignments}
-          >  
-        </CourtSelection>
+        ></CourtSelection>
         <ImportButton
           shouldShowTestButton={true}
           setPlayers={setPlayers}
         ></ImportButton>
-        <div>{players && (
-          <StatusTable 
-            players={players} 
-            setPlayers={setPlayers}
-            onCourtAssign={handleRandomize}
+        <div>
+          {players && (
+            <StatusTable
+              players={players}
+              setPlayers={setPlayers}
+              onCourtAssign={handleRandomize}
             />
           )}
         </div>
