@@ -117,14 +117,28 @@ function StatusTable({ players, setPlayers, onCourtAssign }) {
       className="w-full h-full overflow-y-auto border border-gray-300 rounded-lg p-2 bg-white max-h-[500px]"
       // max-h-[500px]: 스크롤 높이 제한, 필요 시 높이 값 변경
     >
-      <span className="text-lg font-medium text-blue-600 mr-3">RANDOMIZE?</span> {/* 텍스트 강조 */}
-      <button
-        onClick={() => handleRandomize([1, 2, 3])}
-        className="px-3 py-1 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition-all duration-200"
-        // 버튼 스타일: Tailwind 클래스 적용
-      >
-      GO
-    </button>
+      <div className="flex items-center space-x-4 mb-4">
+        <span className="text-lg font-medium text-blue-600">RANDOMIZE?</span>
+        <button
+          onClick={() => handleRandomize([1, 2, 3])}
+          className="px-3 py-1 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition-all duration-200"
+          // 버튼 스타일: Tailwind 클래스 적용
+        >
+          GO
+        </button>
+        <button
+          onClick={() => console.log('Plus button clicked')} // 필요한 로직 추가
+          className="w-8 h-8 flex items-center justify-center bg-green-500 text-white font-semibold rounded-md shadow-md hover:bg-green-600 transition-all duration-200"
+        >
+          +
+        </button>
+        <button
+          onClick={() => console.log('Minus button clicked')} // 필요한 로직 추가
+          className="w-8 h-8 flex items-center justify-center bg-red-500 text-white font-semibold rounded-md shadow-md hover:bg-red-600 transition-all duration-200"
+        >
+          -
+        </button>
+      </div>
       <h2 className="text-lg font-bold mb-2">Players</h2>
       <table className="table-auto w-full text-left">
         <thead>
@@ -135,13 +149,15 @@ function StatusTable({ players, setPlayers, onCourtAssign }) {
           </tr>
         </thead>
         <tbody>
-          {players.length > 0 ? (
-            players.map((player, index) => (
-              <tr key={index} className="hover:bg-gray-100">
-                <td className="px-4 py-2">{player.name}</td> {/* 이름 표시 */}
-                <td className="px-4 py-2">{player.checkedIn}</td> {/* 체크인 여부 */}
-                <td className="px-4 py-2">{player.playingCount || 0}</td> {/* 게임 횟수 */}
-              </tr>
+          {players.filter(player => player.checkedIn === 'Y').length > 0 ? (
+            players
+              .filter(player => player.checkedIn === 'Y')
+              .map((player, index) => (
+                <tr key={index} className="hover:bg-gray-100">
+                  <td className="px-4 py-2">{player.name}</td> {/* 이름 표시 */}
+                  <td className="px-4 py-2">{player.checkedIn}</td> {/* 체크인 여부 */}
+                  <td className="px-4 py-2">{player.playingCount || 0}</td> {/* 게임 횟수 */}
+                </tr>
             ))
           ) : (
             <tr>
