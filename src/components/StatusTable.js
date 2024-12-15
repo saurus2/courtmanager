@@ -195,6 +195,12 @@ function StatusTable({ players, setPlayers, onCourtAssign }) {
         >
           -
         </button>
+        <button
+          onClick={() => console.log('Search button clicked')} // 검색 버튼 기능 추가
+          className="w-8 h-8 flex items-center justify-center bg-gray-500 text-white font-semibold rounded-md shadow-md hover:bg-gray-600 transition-all duration-200"
+        >
+          🔍
+        </button>
       </div>
 
       {/* 모달 창 */}
