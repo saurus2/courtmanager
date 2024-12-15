@@ -6,22 +6,22 @@ function CourtSelection({
   onCourtSelect,
   courtAssignments = {}
 }) {
-  const [selectedSquares, setSelectedSquares] = useState(
+  const [courtSelections, setCourtSelections] = useState(
     Array({ numTotCourts }).fill(false)
   );
 
-  const handleSquareClick = (i) => {
-    const updatedSquares = [...selectedSquares];
-    updatedSquares[i] = !updatedSquares[i];
-    setSelectedSquares(updatedSquares);
+  const onCourtClick = (i) => {
+    const _courtSelections = [...courtSelections];
+    _courtSelections[i] = !courtSelections[i];
+    setCourtSelections(_courtSelections);
 
     // Calling only once
-    if (onCourtSelect) {
-      const selectedCourts = updatedSquares
-        .map((isSelected, index) => (isSelected ? index + 1 : null))
-        .filter((courtNumber) => courtNumber !== null);
-      onCourtSelect(selectedCourts);
-    }
+    // if (onCourtSelect) {
+    //   const selectedCourts = updatedSquares
+    //     .map((isSelected, index) => (isSelected ? index + 1 : null))
+    //     .filter((courtNumber) => courtNumber !== null);
+    //   onCourtSelect(selectedCourts);
+    // }
   };
 
   return (
@@ -34,15 +34,19 @@ function CourtSelection({
       }}
     >
       {Array.from({ length: numTotCourts }, (_, i) => (
-        <div>
-          <Court num={i + 1} isSelected={selectedSquares[i]}></Court>
-          {courtAssignments[i + 1] && courtAssignments[i + 1].length > 0 ? (
+        <div key={i}>
+          <Court
+            i={i}
+            isSelected={courtSelections[i]}
+            onClick={onCourtClick}
+          ></Court>
+          {/* {courtAssignments[i + 1] && courtAssignments[i + 1].length > 0 ? (
             courtAssignments[i + 1].map((name, idx) => (
               <div key={idx}>{name}</div>
             ))
           ) : (
             <div>No Players</div>
-          )}
+          )} */}
         </div>
       ))}
     </div>
