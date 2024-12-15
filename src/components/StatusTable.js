@@ -8,6 +8,24 @@ function StatusTable({ players, setPlayers, onCourtAssign }) {
   const [newPlayerName, setNewPlayerName] = useState(''); // 새 플레이어 이름
   const [selectedPlayerId, setSelectedPlayerId] = useState(null);
 
+  // Removing player by '-' button
+  const removeSelectedPlayer = () => {
+    if (!selectedPlayerId) {
+      alert('No player selected!');
+      return;
+    }
+    
+    const updatedPlayers = players.filter((player) => player.id !== selectedPlayerId);
+
+    // Adjusting the index for randomizing
+    if (players.findIndex((player) => player.id === selectedPlayerId) < currentStartIndex) {
+      setCurrentStartIndex((prevIndex) => Math.max(0, prevIndex - 1)); // Decreasing the index of removed player
+    }
+
+    setPlayers(updatedPlayers);
+    setSelectedPlayerId(null);
+  }
+
   // Click player in the list handler
   const handlePlayerClick = (playerId) => {
     setSelectedPlayerId((prevId) => (prevId === playerId ? null : playerId));
@@ -75,6 +93,18 @@ function StatusTable({ players, setPlayers, onCourtAssign }) {
       courtNumbers = [1, 2]; // 기본값
     }
 
+    if (players.length === 0) {
+      console.log('No players are available!');
+      return;
+    }
+  
+    const totalPlayers = players.length;
+  
+    // 현재 시작 인덱스가 리스트 길이를 초과하지 않도록 조정
+    if (currentStartIndex >= totalPlayers) { // 추가된 코드
+      setCurrentStartIndex(0); // 추가된 코드
+    }
+
     // JSON object
     const courtAssignments = {};
 
@@ -87,15 +117,21 @@ function StatusTable({ players, setPlayers, onCourtAssign }) {
     const batchSize = courtNumbers.length * 4;
 
     // Calculating index of the end of group
-    const endIndex = Math.min(
-      currentStartIndex + batchSize,
-      players.length
-    );
+    const endIndex = Math.min(currentStartIndex + batchSize, totalPlayers);
 
     // The player group for game now
-    const currentBatch = players
-    .slice(currentStartIndex, endIndex)
-    .concat(players.slice(0, Math.max(0, currentStartIndex + batchSize - players.length)));
+    const currentBatch = [
+      ...players.slice(currentStartIndex, endIndex),
+      ...players.slice(0, Math.max(0, currentStartIndex + batchSize - totalPlayers)),
+    ];
+
+    // Mixing
+    const shuffledBatch = currentBatch.sort(() => Math.random() - 0.5);
+
+    shuffledBatch.forEach((player, index) => {
+      const courtIndex = courtNumbers[index % courtNumbers.length];
+      courtAssignments[courtIndex].push(player.name);
+    });
 
     const updatedPlayers = players.map((player) => {
       if (currentBatch.includes(player)) {
@@ -107,29 +143,21 @@ function StatusTable({ players, setPlayers, onCourtAssign }) {
       return { ...player };
     });
 
-    // Mixing
-    const shuffledBatch = currentBatch.sort(() => Math.random() - 0.5);
-
-    // Assigning 4 players on each court
-    shuffledBatch.forEach((player, index) => {
-      const courtIndex = courtNumbers[index % courtNumbers.length];
-      courtAssignments[courtIndex].push(player.name);
-    });
-
+    const newStartIndex = (currentStartIndex + batchSize) % updatedPlayers.length; 
+    setCurrentStartIndex(newStartIndex); 
+  
     setPlayers(updatedPlayers);
-    setCurrentStartIndex(
-      (currentStartIndex + batchSize) % players.length
-    );
-
+  
     if (typeof onCourtAssign === 'function') {
       onCourtAssign(courtAssignments);
     } else {
       console.error('onCourtAssign is not a function');
     }
+  
 
     console.log('Court Assignments:', courtAssignments);
     console.log(players);
-    console.log('Next Start Index:', currentStartIndex); // 디버깅용 로그
+    console.log('Next Start Index:', currentStartIndex); 
   };
 
   return (
@@ -153,7 +181,7 @@ function StatusTable({ players, setPlayers, onCourtAssign }) {
           +
         </button>
         <button
-          onClick={() => console.log('Minus button clicked')} 
+          onClick={removeSelectedPlayer} 
           className="w-8 h-8 flex items-center justify-center bg-red-500 text-white font-semibold rounded-md shadow-md hover:bg-red-600 transition-all duration-200"
         >
           -
