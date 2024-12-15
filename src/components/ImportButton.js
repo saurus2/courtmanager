@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import React, { Component }  from 'react';
+import React, { Component } from 'react';
 import moment from 'moment-timezone';
 
 const ImportButton = ({ shouldShowTestButton, setPlayers }) => {
@@ -70,14 +70,14 @@ const ImportButton = ({ shouldShowTestButton, setPlayers }) => {
     handleFileChange(fakeEvent);
   };
   return (
-    <div className="flex items-center space-x-4 mb-3"> 
+    <div className='flex items-center space-x-4 mb-3'>
       <label
-        htmlFor="fileInput"
-        className="px-4 py-1 bg-blue-500 text-white font-semibold rounded-md shadow-md hover:bg-blue-600 cursor-pointer transition-all duration-200 text-sm"
+        htmlFor='fileInput'
+        className='px-4 py-1 bg-blue-500 text-white font-semibold rounded-md shadow-md hover:bg-blue-600 cursor-pointer transition-all duration-200 text-sm'
         style={{ display: 'inline-block', textAlign: 'center' }}
       >
         Import Excel
-      </label>      
+      </label>
       <input
         type='file'
         id='fileInput'
@@ -88,10 +88,10 @@ const ImportButton = ({ shouldShowTestButton, setPlayers }) => {
       {shouldShowTestButton && (
         <button
           onClick={handleTestFile}
-          className="px-4 py-1 bg-blue-500 text-white font-semibold rounded-md shadow-md hover:bg-blue-600 transition-all duration-200 text-sm"
+          className='px-4 py-1 bg-blue-500 text-white font-semibold rounded-md shadow-md hover:bg-blue-600 transition-all duration-200 text-sm'
         >
-        Test Excel
-      </button>
+          Test Excel
+        </button>
       )}
     </div>
   );
