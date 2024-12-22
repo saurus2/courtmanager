@@ -5,6 +5,37 @@ function StatusTable({ players, setPlayers }) {
   const [isModalOpen, setIsModalOpen] = useState(false); // 모달 창 상태
   const [newPlayerName, setNewPlayerName] = useState(''); // 새 플레이어 이름
   const [selectedPlayerId, setSelectedPlayerId] = useState(null);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [searchName, setSearchName] = useState(''); // 검색 이름
+
+  // Search modal window
+  const openSearchModal = () => setIsSearchModalOpen(true);
+  const closeSearchModal = () => {
+    setIsSearchModalOpen(false);
+    setSearchName('');
+  };
+
+  // Searching Player
+  const searchPlayer = () => {
+    const foundPlayer = players.find(
+      (player) => player.name === searchName.trim()
+    );
+
+    if (!foundPlayer) {
+      alert('Player not found!');
+      return;
+    }
+
+    setSelectedPlayerId(foundPlayer.id); // Setting selected player
+
+    // Adjusting scroll
+    const playerRow = document.getElementById(`player-${foundPlayer.id}`);
+    if (playerRow) {
+      playerRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    closeSearchModal(); // Close modal window
+  };
 
   // Click player in the list handler
   const handlePlayerClick = (playerId) => {
@@ -72,10 +103,7 @@ function StatusTable({ players, setPlayers }) {
   }
 
   return (
-    <div
-      className='w-full h-full overflow-y-auto border border-gray-300 rounded-lg p-2 bg-white max-h-[500px]'
-      // max-h-[500px]: 스크롤 높이 제한, 필요 시 높이 값 변경
-    >
+    <div className='w-full h-full overflow-y-auto border border-gray-300 rounded-lg p-2 bg-white max-h-[500px]'>
       <div className='flex justify-between items-center mt-2 mx-4'>
         <p>Total players: {players.length}</p>
         <div className='flex space-x-2'>
