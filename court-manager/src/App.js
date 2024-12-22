@@ -2,46 +2,48 @@ import './App.css';
 import React, { useState } from 'react';
 import ImportButton from './components/ImportButton';
 import StatusTable from './components/StatusTable';
-import CourtSelection from './components/CourtSelection';
+import Assignment from './components/Assignment';
 
 function App() {
-  const [players, setPlayers] = useState([]); 
-  const [courtAssignments, setCourtAssignments] = useState({}); 
-  const [selectedCourts, setSelectedCourts] = useState([]); 
+  const [players, setPlayers] = useState([]);
+  const [assignments, setAssignments] = useState({});
 
   // updating court information
-  const handleRandomize = (assignments) => {
-    if (players.length === 0) {
-      console.error('No players are available!');
-      return;
-    }
+  // const handleRandomize = (assignments) => {
+  //   if (players.length === 0) {
+  //     console.error('No players are available!');
+  //     return;
+  //   }
 
-    setCourtAssignments(assignments); 
-  };
+  //   setCourtAssignments(assignments);
+  // };
 
   return (
-    <div className='App'>
-      <header className='App-header'>
-        <h1>COURT MANAGER</h1>
-        <CourtSelection 
-          numTotCourts={17}
-          onCourtSelect={setSelectedCourts}
-          courtAssignments={courtAssignments}
-          >  
-        </CourtSelection>
-        <ImportButton
-          shouldShowTestButton={true}
-          setPlayers={setPlayers}
-        ></ImportButton>
-        <div>{players && (
-          <StatusTable 
-            players={players} 
+    <div className='App p-8'>
+      <h1 className='text-4xl font-bold text-blue-500'>COURT MANAGER</h1>
+      <div className='flex'>
+        <div className='w-1/3 p-4'>
+          <ImportButton
+            shouldShowTestButton={true}
             setPlayers={setPlayers}
-            onCourtAssign={handleRandomize}
+          ></ImportButton>
+          {players && (
+            <StatusTable
+              players={players}
+              setPlayers={setPlayers}
+              // onCourtAssign={handleRandomize}
             />
           )}
         </div>
-      </header>
+        <div className='w-2/3 p-4'>
+          <Assignment
+            numTotCourts={8}
+            players={players}
+            assignments={assignments}
+            setAssignments={setAssignments}
+          ></Assignment>
+        </div>
+      </div>
     </div>
   );
 }

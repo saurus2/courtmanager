@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import React, { Component }  from 'react';
+import React, { Component } from 'react';
 import moment from 'moment-timezone';
 
 const ImportButton = ({ shouldShowTestButton, setPlayers }) => {
@@ -45,7 +45,12 @@ const ImportButton = ({ shouldShowTestButton, setPlayers }) => {
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
         const fileData = XLSX.utils.sheet_to_json(sheet);
-        const sortedPlayers = getSortedPlayers(fileData);
+
+        const filteredData = fileData.filter(
+          (player) => player['Checked In'] === 'Yes'
+        );
+
+        const sortedPlayers = getSortedPlayers(filteredData);
         setPlayers(sortedPlayers);
       };
       reader.readAsArrayBuffer(file);
@@ -65,12 +70,14 @@ const ImportButton = ({ shouldShowTestButton, setPlayers }) => {
     handleFileChange(fakeEvent);
   };
   return (
-    <div>
-      <button>
-        <label htmlFor='fileInput' style={{ cursor: 'pointer' }}>
-          Import Excel
-        </label>
-      </button>
+    <div className='flex items-center space-x-4 mb-3'>
+      <label
+        htmlFor='fileInput'
+        className='px-4 py-1 bg-blue-500 text-white font-semibold rounded-md shadow-md hover:bg-blue-600 cursor-pointer transition-all duration-200 text-sm'
+        style={{ display: 'inline-block', textAlign: 'center' }}
+      >
+        Import Excel
+      </label>
       <input
         type='file'
         id='fileInput'
@@ -79,8 +86,11 @@ const ImportButton = ({ shouldShowTestButton, setPlayers }) => {
         onChange={handleFileChange}
       />
       {shouldShowTestButton && (
-        <button onClick={handleTestFile}>
-          <label style={{ cursor: 'pointer' }}>Test Excel</label>
+        <button
+          onClick={handleTestFile}
+          className='px-4 py-1 bg-blue-500 text-white font-semibold rounded-md shadow-md hover:bg-blue-600 transition-all duration-200 text-sm'
+        >
+          Test Excel
         </button>
       )}
     </div>
