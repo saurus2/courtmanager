@@ -1,31 +1,55 @@
 import React, { useState } from 'react';
 import RandomizeButton from './RandomizeButton';
-import CourtStatus from './CourtStatus';
+import Court from './Court';
 
-function Assignment({ numTotCourts, players, assignments, setAssignments }) {
-  const [courtSelections, setCourtSelections] = useState(
-    Array({ numTotCourts }).fill(false)
+function Assignment({ numTotCourts, players, setPlayers }) {
+  const [courts, setCourts] = useState(
+    Array(numTotCourts)
+      .fill(null)
+      .map((_, i) => ({
+        courtIndex: i,
+        isSelected: false,
+        players: []
+      }))
   );
 
-  const onCourtClick = (i) => {
-    const _courtSelections = [...courtSelections];
-    _courtSelections[i] = !courtSelections[i];
-    setCourtSelections(_courtSelections);
-  };
+  function onCourtSelected(courtIndex) {
+    const _courts = [...courts];
+    _courts[courtIndex] = {
+      ...courts[courtIndex],
+      isSelected: !courts[courtIndex].isSelected
+    };
+    setCourts(_courts);
+  }
+
+  function onAssignPlayers(courtAssignments) {
+    const _courts = courts.map((court) => ({
+      ...court,
+      players: courtAssignments[court.courtIndex] || []
+    }));
+    setCourts(_courts);
+  }
 
   return (
     <div>
-      <CourtStatus
-        numTotCourts={numTotCourts}
-        courtSelections={courtSelections}
-        onCourtClick={onCourtClick}
-        assignments={assignments}
-      ></CourtStatus>
+      <div className='grid grid-cols-[repeat(auto-fit,_minmax(150px,_1fr))] gap-5'>
+        {courts.map((court, i) => (
+          <div key={i}>
+            <Court
+              courtIndex={court.courtIndex}
+              isSelected={court.isSelected}
+              onCourtSelected={onCourtSelected}
+              players={court.players}
+            ></Court>
+          </div>
+        ))}
+      </div>
       <div className='mt-4'>
         <RandomizeButton
-          courtSelections={courtSelections}
+          courts={courts}
           players={players}
-          setAssignments={setAssignments}
+          setPlayers={setPlayers}
+          onAssignPlayers={onAssignPlayers}
         ></RandomizeButton>
       </div>
     </div>
