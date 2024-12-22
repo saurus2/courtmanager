@@ -1,8 +1,12 @@
 import React, { useRef } from 'react';
 
-function RandomizeButton({ courts, players, setPlayers, onAssignPlayers }) {
-  const currentStartIndex = useRef(0);
-
+function RandomizeButton({
+  courts,
+  players,
+  setPlayers,
+  onAssignPlayers,
+  currentStartIndex
+}) {
   const totalPlayers = players.length;
 
   const courtsAvailable = courts.filter((court) => court.isSelected);

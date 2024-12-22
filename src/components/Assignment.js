@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import RandomizeButton from './RandomizeButton';
 import Court from './Court';
 
-function Assignment({ numTotCourts, players, setPlayers }) {
+function Assignment({ numTotCourts, players, setPlayers, currentStartIndex }) {
   const [courts, setCourts] = useState(
     Array(numTotCourts)
       .fill(null)
@@ -50,6 +50,7 @@ function Assignment({ numTotCourts, players, setPlayers }) {
           players={players}
           setPlayers={setPlayers}
           onAssignPlayers={onAssignPlayers}
+          currentStartIndex={currentStartIndex}
         ></RandomizeButton>
       </div>
     </div>
