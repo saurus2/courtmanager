@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function StatusTable({ players, setPlayers }) {
+function StatusTable({ players, setPlayers, currentStartIndex }) {
   // The information for view
   const [isModalOpen, setIsModalOpen] = useState(false); // 모달 창 상태
   const [newPlayerName, setNewPlayerName] = useState(''); // 새 플레이어 이름
@@ -84,6 +84,14 @@ function StatusTable({ players, setPlayers }) {
     const updatedPlayers = players.filter(
       (player) => player.id !== selectedPlayerId
     );
+
+    // Adjusting the index for randomizing
+    if (
+      players.findIndex((player) => player.id === selectedPlayerId) <
+      currentStartIndex.current
+    ) {
+      currentStartIndex.current = Math.max(0, currentStartIndex.current - 1); // Decreasing the index of removed player
+    }
 
     setPlayers(updatedPlayers);
     setSelectedPlayerId(null);
