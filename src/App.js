@@ -6,17 +6,6 @@ import Assignment from './components/Assignment';
 
 function App() {
   const [players, setPlayers] = useState([]);
-  const [assignments, setAssignments] = useState({});
-
-  // updating court information
-  // const handleRandomize = (assignments) => {
-  //   if (players.length === 0) {
-  //     console.error('No players are available!');
-  //     return;
-  //   }
-
-  //   setCourtAssignments(assignments);
-  // };
 
   return (
     <div className='App p-8'>
@@ -24,23 +13,16 @@ function App() {
       <div className='flex'>
         <div className='w-1/3 p-4'>
           <ImportButton
-            shouldShowTestButton={true}
+            shouldShowTestButton={false}
             setPlayers={setPlayers}
           ></ImportButton>
-          {players && (
-            <StatusTable
-              players={players}
-              setPlayers={setPlayers}
-              // onCourtAssign={handleRandomize}
-            />
-          )}
+          <StatusTable players={players} setPlayers={setPlayers} />
         </div>
         <div className='w-2/3 p-4'>
           <Assignment
             numTotCourts={8}
             players={players}
-            assignments={assignments}
-            setAssignments={setAssignments}
+            setPlayers={setPlayers}
           ></Assignment>
         </div>
       </div>
