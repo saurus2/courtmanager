@@ -5,7 +5,8 @@ function RandomizeButton({
   players,
   setPlayers,
   onAssignPlayers,
-  currentStartIndex
+  currentStartIndex,
+  updateStartIndex
 }) {
   const totalPlayers = players.length;
 
@@ -66,7 +67,7 @@ function RandomizeButton({
     const newStartIndex =
       (currentStartIndex.current + batchSize) % totalPlayers;
     currentStartIndex.current = newStartIndex;
-
+    updateStartIndex(newStartIndex);
     setPlayers(updatedPlayers);
     onAssignPlayers(courtAssignments);
   }

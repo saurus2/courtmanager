@@ -1,33 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import RandomizeButton from './RandomizeButton';
 import Court from './Court';
 
-function Assignment({ numTotCourts, players, setPlayers, currentStartIndex }) {
-  const [courts, setCourts] = useState(
-    Array(numTotCourts)
-      .fill(null)
-      .map((_, i) => ({
-        courtIndex: i,
-        isSelected: false,
-        players: []
-      }))
-  );
+function Assignment({ 
+  numTotCourts, 
+  players, 
+  setPlayers, 
+  courts,
+  setCourts,
+  currentStartIndex, 
+  updateStartIndex 
+}) {
+  // const [courts, setCourts] = useState(() => {
+  //   const savedCourts = localStorage.getItem('courts'); // loading data from localStorage
+  //   return savedCourts
+  //     ? JSON.parse(savedCourts) // loading saved courts data
+  //     : Array(numTotCourts)
+  //       .fill(null)
+  //       .map((_, i) => ({
+  //         courtIndex: i,
+  //         isSelected: false,
+  //         players: []
+  //       }));
+  // });
+
+  // saving updated courts data on localStorage
+  useEffect(() => {
+    localStorage.setItem('courts', JSON.stringify(courts));
+  }, [courts]);
 
   function onCourtSelected(courtIndex) {
-    const _courts = [...courts];
-    _courts[courtIndex] = {
-      ...courts[courtIndex],
-      isSelected: !courts[courtIndex].isSelected
-    };
-    setCourts(_courts);
+    const updatedCourts = courts.map((court, i) => ({
+      ...court,
+      isSelected: i === courtIndex ? !court.isSelected : court.isSelected
+    }));
+    setCourts(updatedCourts);
   }
 
   function onAssignPlayers(courtAssignments) {
-    const _courts = courts.map((court) => ({
+    const updatedCourts = courts.map((court) => ({
       ...court,
       players: courtAssignments[court.courtIndex] || []
     }));
-    setCourts(_courts);
+    setCourts(updatedCourts);
   }
 
   return (
@@ -38,7 +53,7 @@ function Assignment({ numTotCourts, players, setPlayers, currentStartIndex }) {
             <Court
               courtIndex={court.courtIndex}
               isSelected={court.isSelected}
-              onCourtSelected={onCourtSelected}
+              onCourtSelected={() => onCourtSelected(court.courtIndex)}
               players={court.players}
             ></Court>
           </div>
@@ -51,6 +66,7 @@ function Assignment({ numTotCourts, players, setPlayers, currentStartIndex }) {
           setPlayers={setPlayers}
           onAssignPlayers={onAssignPlayers}
           currentStartIndex={currentStartIndex}
+          updateStartIndex={updateStartIndex} // transferring update start index
         ></RandomizeButton>
       </div>
     </div>

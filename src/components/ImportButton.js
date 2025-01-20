@@ -2,7 +2,7 @@ import * as XLSX from 'xlsx';
 import React, { Component } from 'react';
 import moment from 'moment-timezone';
 
-const ImportButton = ({ shouldShowTestButton, setPlayers }) => {
+const ImportButton = ({ shouldShowTestButton, setPlayers, setCourts}) => {
   function getSortedPlayers(fileData) {
     const validPlayers = fileData.filter(
       (d) =>
@@ -51,11 +51,38 @@ const ImportButton = ({ shouldShowTestButton, setPlayers }) => {
         );
 
         const sortedPlayers = getSortedPlayers(filteredData);
-        setPlayers(sortedPlayers);
+        // saving updated data on localStorage directly
+        setPlayers((prevPlayers) => {
+          const updatedPlayers = [...prevPlayers, ...sortedPlayers];
+          localStorage.setItem('players', JSON.stringify(updatedPlayers));
+          return updatedPlayers;
+        });
       };
       reader.readAsArrayBuffer(file);
     }
   };
+
+  // data reset function
+  const handleResetData = () => {
+    const confirmReset = window.confirm('Do you want to reset?'); // 확인 창
+    if (confirmReset) {
+      // ✅ localStorage 데이터 초기화
+      localStorage.removeItem('players');
+      localStorage.removeItem('courts');
+      localStorage.removeItem('currentStartIndex');
+      // ✅ React 상태 초기화
+      setPlayers([]); // 플레이어 초기화
+      setCourts((prevCourts) =>
+        prevCourts.map((court) => ({
+          ...court,
+          isSelected: false, // 코트 선택 상태 초기화
+          players: [] // 배정된 플레이어 초기화
+        }))
+      );
+      alert('All data has been reset.'); // 알림 메시지
+    }
+  };
+
   const handleTestFile = async () => {
     const response = await fetch('/data/data_01.xlsx');
     const fileBlob = await response.blob();
@@ -69,6 +96,7 @@ const ImportButton = ({ shouldShowTestButton, setPlayers }) => {
     };
     handleFileChange(fakeEvent);
   };
+
   return (
     <div className='flex items-center space-x-4 mb-3'>
       <label
@@ -93,6 +121,12 @@ const ImportButton = ({ shouldShowTestButton, setPlayers }) => {
           Test Excel
         </button>
       )}
+      <button
+        onClick={handleResetData}
+        className='px-4 py-1 bg-red-500 text-white font-semibold rounded-md shadow-md hover:bg-red-600 transition-all duration-200 text-sm'
+      >
+        Reset Data
+      </button>
     </div>
   );
 };
