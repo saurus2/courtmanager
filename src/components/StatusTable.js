@@ -193,8 +193,8 @@ function StatusTable({ players, setPlayers, currentStartIndex }) {
       <table className='table-auto w-full text-left'>
         <thead>
           <tr className='border-b'>
+            <th className='px-4 py-2'>ID</th> {/* ID 컬럼 추가 */}
             <th className='px-4 py-2'>Name</th>
-            <th className='px-4 py-2'>Checked In</th>
             <th className='px-4 py-2'>Games Played</th>
           </tr>
         </thead>
@@ -212,8 +212,8 @@ function StatusTable({ players, setPlayers, currentStartIndex }) {
                       : 'hover:bg-gray-100'
                   }`}
                 >
+                  <td className='px-4 py-2'>{player.id}</td> {/* ID 표시 */}
                   <td className='px-4 py-2'>{player.name}</td>
-                  <td className='px-4 py-2'>{player.checkedIn}</td>
                   <td className='px-4 py-2'>{player.playingCount || 0}</td>
                 </tr>
               ))

@@ -1,16 +1,24 @@
 import * as XLSX from 'xlsx';
-import React, { Component } from 'react';
+import React from 'react';
 import moment from 'moment-timezone';
 
-const ImportButton = ({ shouldShowTestButton, setPlayers, setCourts}) => {
+const ImportButton = ({ shouldShowTestButton, setPlayers, setCourts }) => {
+  // ID 생성 함수: 모든 플레이어 리스트에서 ID를 오름차순으로 생성
+  function assignSequentialIds(players) {
+    return players.map((player, index) => ({
+      ...player,
+      id: (index + 1).toString() // 오름차순 ID 생성 (1부터 시작)
+    }));
+  }
+
+  // 플레이어 정렬 및 ID 할당
   function getSortedPlayers(fileData) {
     const validPlayers = fileData.filter(
       (d) =>
         d['Checked In'] !== undefined &&
         (d['Checked In'] === 'Yes' || d['Checked In'] === 'No')
     );
-    const simplifiedPlayers = validPlayers.map((d, i) => ({
-      id: '00' + i,
+    const simplifiedPlayers = validPlayers.map((d) => ({
       name: d.Name,
       checkedIn: d['Checked In'] === 'Yes' ? 'Y' : 'N',
       checkInDate:
@@ -29,7 +37,6 @@ const ImportButton = ({ shouldShowTestButton, setPlayers, setCourts}) => {
       if (b.checkInDate === '') {
         return -1; // b is empty, a comes first
       }
-      // Sort by checkInDate for valid dates
       return a.checkInDate - b.checkInDate;
     });
     return sortedPlayers;
@@ -51,10 +58,14 @@ const ImportButton = ({ shouldShowTestButton, setPlayers, setCourts}) => {
         );
 
         const sortedPlayers = getSortedPlayers(filteredData);
-        // saving updated data on localStorage directly
+
+        // 기존 플레이어와 병합 후 ID 재할당
         setPlayers((prevPlayers) => {
-          const updatedPlayers = [...prevPlayers, ...sortedPlayers];
-          localStorage.setItem('players', JSON.stringify(updatedPlayers));
+          const updatedPlayers = assignSequentialIds([
+            ...prevPlayers,
+            ...sortedPlayers
+          ]);
+          localStorage.setItem('players', JSON.stringify(updatedPlayers)); // LocalStorage에 저장
           return updatedPlayers;
         });
       };
@@ -62,23 +73,20 @@ const ImportButton = ({ shouldShowTestButton, setPlayers, setCourts}) => {
     }
   };
 
-  // data reset function
+  // 데이터 초기화
   const handleResetData = () => {
-    const confirmReset = window.confirm('Do you want to reset?'); // 확인 창
+    const confirmReset = window.confirm('Do you want to reset?');
     if (confirmReset) {
-      // [수정된 부분] localStorage와 React 상태 초기화
-      localStorage.clear(); // [수정된 부분] localStorage의 모든 데이터를 제거
-      setPlayers([]); // React 상태 초기화
+      localStorage.clear(); // LocalStorage 초기화
+      setPlayers([]); // 상태 초기화
       setCourts((prevCourts) =>
-      prevCourts.map((court) => ({
-        ...court,
-        isSelected: false,
-        players: []
+        prevCourts.map((court) => ({
+          ...court,
+          isSelected: false,
+          players: []
         }))
       );
-
-      // [추가된 부분] 페이지 상태를 강제로 새로고침 없이 동기화
-      window.location.reload(); // 페이지 새로고침 없이 전체 상태를 초기화
+      window.location.reload(); // 페이지 새로고침
     }
   };
 
