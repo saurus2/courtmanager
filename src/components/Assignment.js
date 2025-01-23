@@ -34,23 +34,36 @@ function Assignment({
       // 이미 선택된 경우 해제
       setSelectedPlayers((prev) => prev.filter((p) => p.id !== player.id));
     } else {
-      // 같은 코트에서 이미 선택된 플레이어가 있다면 무시
-      const alreadySelectedFromSameCourt = selectedPlayers.some(
+      // 첫 번째로 선택된 코트
+      const firstSelectedCourtIndex =
+        selectedPlayers.length > 0 ? selectedPlayers[0].courtIndex : null;
+  
+      // 같은 코트에서 두 번째 플레이어를 바로 선택하려고 할 때 무시
+      if (firstSelectedCourtIndex === courtIndex && selectedPlayers.length === 1) {
+        return; // 첫 번째 코트에서 두 번째 사람 선택을 방지
+      }
+  
+      // 같은 코트에서 이미 선택된 사람이 있을 경우 해당 사람 교체
+      const sameCourtPlayerIndex = selectedPlayers.findIndex(
         (p) => p.courtIndex === courtIndex
       );
   
-      if (alreadySelectedFromSameCourt) {
-        return; // 같은 코트에서는 선택 동작 무시
+      if (sameCourtPlayerIndex !== -1) {
+        // 같은 코트에 선택된 사람이 있다면, 새로운 사람으로 교체
+        const updatedSelection = [...selectedPlayers];
+        updatedSelection[sameCourtPlayerIndex] = { ...player, courtIndex };
+        setSelectedPlayers(updatedSelection);
+      } else {
+        // 새로운 플레이어 선택 (다른 코트 또는 첫 번째 선택)
+        const newSelection = [...selectedPlayers, { ...player, courtIndex }];
+        if (newSelection.length > 2) {
+          newSelection.shift(); // 2명을 초과하면 가장 처음 선택된 플레이어 제거
+        }
+        setSelectedPlayers(newSelection);
       }
-  
-      // 새로운 플레이어 선택
-      const newSelection = [...selectedPlayers, { ...player, courtIndex }];
-      if (newSelection.length > 2) {
-        newSelection.shift(); // 2명을 초과하면 가장 처음 선택된 플레이어 제거
-      }
-      setSelectedPlayers(newSelection);
     }
   }
+  
   
 
   function onAssignPlayers(courtAssignments) {
