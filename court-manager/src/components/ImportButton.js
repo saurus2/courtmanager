@@ -66,20 +66,19 @@ const ImportButton = ({ shouldShowTestButton, setPlayers, setCourts}) => {
   const handleResetData = () => {
     const confirmReset = window.confirm('Do you want to reset?'); // 확인 창
     if (confirmReset) {
-      // ✅ localStorage 데이터 초기화
-      localStorage.removeItem('players');
-      localStorage.removeItem('courts');
-      localStorage.removeItem('currentStartIndex');
-      // ✅ React 상태 초기화
-      setPlayers([]); // 플레이어 초기화
+      // [수정된 부분] localStorage와 React 상태 초기화
+      localStorage.clear(); // [수정된 부분] localStorage의 모든 데이터를 제거
+      setPlayers([]); // React 상태 초기화
       setCourts((prevCourts) =>
-        prevCourts.map((court) => ({
-          ...court,
-          isSelected: false, // 코트 선택 상태 초기화
-          players: [] // 배정된 플레이어 초기화
+      prevCourts.map((court) => ({
+        ...court,
+        isSelected: false,
+        players: []
         }))
       );
-      alert('All data has been reset.'); // 알림 메시지
+
+      // [추가된 부분] 페이지 상태를 강제로 새로고침 없이 동기화
+      window.location.reload(); // 페이지 새로고침 없이 전체 상태를 초기화
     }
   };
 
