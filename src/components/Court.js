@@ -21,7 +21,7 @@ export default function Court({
             key={i}
             onClick={(e) => {
               e.stopPropagation(); // 부모 div의 onClick 이벤트와 충돌 방지
-              onPlayerClick(player, courtIndex); // 🛠️ 플레이어 클릭 핸들러 호출
+              onPlayerClick(player, courtIndex); // 플레이어 클릭 핸들러 호출
             }}
             className={`cursor-pointer rounded px-2 py-1 ${
               player.isSelected
