@@ -9,9 +9,13 @@ function Assignment({
   courts,
   setCourts,
   currentStartIndex, 
-  updateStartIndex 
+  updateStartIndex,
+  isLocked
 }) {
   const [selectedPlayers, setSelectedPlayers] = useState([]);
+  const [temporaryCourts, setTemporaryCourts] = useState([]); // 임시 코트 데이터
+  const [tempStartIndex, setTempStartIndex] = useState(currentStartIndex.current); // 임시 시작 인덱스
+  const [assignClicked, setAssignClicked] = useState(false); // Assign players 클릭 여부
 
   // saving updated courts data on localStorage
   useEffect(() => {
@@ -19,6 +23,7 @@ function Assignment({
   }, [courts]);
 
   function onCourtSelected(courtIndex) {
+    if (isLocked) return; 
     const updatedCourts = courts.map((court, i) => ({
       ...court,
       isSelected: i === courtIndex ? !court.isSelected : court.isSelected
@@ -28,50 +33,52 @@ function Assignment({
 
   // 추가된 함수: 플레이어 선택 로직
   function handlePlayerClick(player, courtIndex = null) {
-  const alreadySelected = selectedPlayers.find((p) => p.id === player.id);
+    const alreadySelected = selectedPlayers.find((p) => p.id === player.id);
 
-  if (alreadySelected) {
-    // 이미 선택된 경우 해제
-    setSelectedPlayers((prev) => prev.filter((p) => p.id !== player.id));
-  } else {
-    // 첫 번째로 선택된 코트
-    const firstSelectedCourtIndex =
-      selectedPlayers.length > 0 ? selectedPlayers[0].courtIndex : null;
-
-    // 같은 코트에서 두 번째 플레이어를 바로 선택하려고 할 때 무시
-    if (firstSelectedCourtIndex === courtIndex && selectedPlayers.length === 1) {
-      return; // 첫 번째 코트에서 두 번째 사람 선택을 방지
-    }
-
-    // 같은 코트에서 이미 선택된 사람이 있을 경우 해당 사람 교체
-    const sameCourtPlayerIndex = selectedPlayers.findIndex(
-      (p) => p.courtIndex === courtIndex
-    );
-
-    if (sameCourtPlayerIndex !== -1) {
-      // 같은 코트에 선택된 사람이 있다면, 새로운 사람으로 교체
-      const updatedSelection = [...selectedPlayers];
-      updatedSelection[sameCourtPlayerIndex] = { ...player, courtIndex };
-      setSelectedPlayers(updatedSelection);
+    if (alreadySelected) {
+      // 이미 선택된 경우 해제
+      setSelectedPlayers((prev) => prev.filter((p) => p.id !== player.id));
     } else {
-      // 새로운 플레이어 선택 (다른 코트 또는 첫 번째 선택)
-      const newSelection = [...selectedPlayers, { ...player, courtIndex }];
-      if (newSelection.length > 2) {
-        newSelection.shift(); // 2명을 초과하면 가장 처음 선택된 플레이어 제거
+      // 첫 번째로 선택된 코트
+      const firstSelectedCourtIndex =
+        selectedPlayers.length > 0 ? selectedPlayers[0].courtIndex : null;
+
+      // 같은 코트에서 두 번째 플레이어를 바로 선택하려고 할 때 무시
+      if (firstSelectedCourtIndex === courtIndex && selectedPlayers.length === 1) {
+        return; // 첫 번째 코트에서 두 번째 사람 선택을 방지
       }
-      setSelectedPlayers(newSelection);
+
+      // 같은 코트에서 이미 선택된 사람이 있을 경우 해당 사람 교체
+      const sameCourtPlayerIndex = selectedPlayers.findIndex(
+        (p) => p.courtIndex === courtIndex
+      );
+
+      if (sameCourtPlayerIndex !== -1) {
+        // 같은 코트에 선택된 사람이 있다면, 새로운 사람으로 교체
+        const updatedSelection = [...selectedPlayers];
+        updatedSelection[sameCourtPlayerIndex] = { ...player, courtIndex };
+        setSelectedPlayers(updatedSelection);
+      } else {
+        // 새로운 플레이어 선택 (다른 코트 또는 첫 번째 선택)
+        const newSelection = [...selectedPlayers, { ...player, courtIndex }];
+        if (newSelection.length > 2) {
+          newSelection.shift(); // 2명을 초과하면 가장 처음 선택된 플레이어 제거
+        }
+        setSelectedPlayers(newSelection);
+      }
     }
   }
-}
-
-  
 
   function onAssignPlayers(courtAssignments) {
     const updatedCourts = courts.map((court) => ({
       ...court,
       players: courtAssignments[court.courtIndex] || []
     }));
-    setCourts(updatedCourts);
+    // 임시 코트 데이터에 저장 (화면에도 즉시 반영)
+    setTemporaryCourts(updatedCourts);
+    setCourts(updatedCourts); // 화면에 즉시 반영
+    setTempStartIndex(currentStartIndex.current); // 임시 인덱스 저장
+    setAssignClicked(true); // Assign players가 눌렸음을 표시
   }
 
   function handleChangePlayers() {
@@ -111,6 +118,40 @@ function Assignment({
     setSelectedPlayers([]);
   }
   
+  function handleConfirmAssignments() {
+    if (temporaryCourts.length === 0) {
+      alert('Assign players first before confirming!');
+      return;
+    }
+
+    setCourts(temporaryCourts); // 임시 데이터를 실제 데이터로 반영
+    currentStartIndex.current = tempStartIndex;
+
+    // 게임 횟수 업데이트
+    const updatedPlayers = players.map((player) => {
+      const isAssigned = temporaryCourts.some((court) =>
+        court.players.some((courtPlayer) => courtPlayer.id === player.id)
+      );
+      if (isAssigned) {
+        return {
+          ...player,
+          playingCount: (Number(player.playingCount) || 0) + 1
+        };
+      }
+      return player;
+    });
+
+    setPlayers(updatedPlayers);
+
+    // 로컬스토리지에 반영
+    localStorage.setItem('players', JSON.stringify(updatedPlayers));
+    localStorage.setItem('courts', JSON.stringify(temporaryCourts));
+
+    // 임시 데이터 초기화
+    setTemporaryCourts([...courts]);
+
+    setAssignClicked(false); // Cornfimation 버튼 비활성화
+  }
 
   return (
     <div>
@@ -137,7 +178,7 @@ function Assignment({
           setPlayers={setPlayers}
           onAssignPlayers={onAssignPlayers}
           currentStartIndex={currentStartIndex}
-          updateStartIndex={updateStartIndex}
+          updateStartIndex={setTempStartIndex} // 임시 인덱스 업데이트
         ></RandomizeButton>
         {/* Change Players 버튼 추가 */}
         <button
@@ -145,6 +186,18 @@ function Assignment({
           className='px-4 py-2 bg-green-500 text-white rounded-md ml-2'
         >
           Change Players
+        </button>
+        {/* Confirmation 버튼 추가 */}
+        <button
+          onClick={handleConfirmAssignments}
+          disabled={!assignClicked} // Assign players가 눌리지 않으면 비활성화
+          className={`px-4 py-2 rounded-md ml-2 ${
+            assignClicked
+              ? 'bg-blue-500 text-white'
+              : 'bg-gray-300 text-gray-500 cursor-default'
+          }`}
+        >
+          Confirmation
         </button>
       </div>
     </div>

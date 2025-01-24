@@ -9,7 +9,6 @@ function RandomizeButton({
   updateStartIndex
 }) {
   const totalPlayers = players.length;
-
   const courtsAvailable = courts.filter((court) => court.isSelected);
   const isCourtsUnavailable = courtsAvailable.length === 0;
   const isPlayersUnavailable = totalPlayers === 0;
@@ -53,22 +52,12 @@ function RandomizeButton({
         courtsAvailable[index % courtsAvailable.length].courtIndex;
       courtAssignments[courtIndex].push(player);
     });
-
-    const updatedPlayers = players.map((player) => {
-      if (currentBatch.includes(player)) {
-        return {
-          ...player,
-          playingCount: (parseInt(player.playingCount, 10) || 0) + 1
-        };
-      }
-      return { ...player };
-    });
-
+    
     const newStartIndex =
       (currentStartIndex.current + batchSize) % totalPlayers;
     currentStartIndex.current = newStartIndex;
     updateStartIndex(newStartIndex);
-    setPlayers(updatedPlayers);
+    // setPlayers(updatedPlayers);
     onAssignPlayers(courtAssignments);
   }
   return (
@@ -81,7 +70,7 @@ function RandomizeButton({
       disabled={shouldBeDisabled}
       onClick={() => handleRandomize()}
     >
-      Assign players
+      Assign Players
     </button>
   );
 }

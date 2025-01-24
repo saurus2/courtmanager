@@ -29,6 +29,8 @@ function App() {
       : 0
   );
 
+  const [isLocked, setIsLocked] = useState(false); // Lock 상태 관리
+
   // saving data function
   useEffect(() => {
     localStorage.setItem('players', JSON.stringify(players)); // saving data on localStorage when players status was updated
@@ -44,9 +46,37 @@ function App() {
     localStorage.setItem('currentStartIndex', newIndex.toString()); // saving start index
   };
 
-  return (
-    <div className='App p-8'>
+  // Lock 토글 핸들러
+  const toggleLock = () => {
+    setIsLocked((prev) => !prev);
+  };
+
+  return  (
+    <div className='App p-8 relative'>
       <h1 className='text-4xl font-bold text-blue-500'>COURT MANAGER</h1>
+
+      {/* 토글 스위치 추가 */}
+      <div className="absolute top-4 right-4">
+        <label className="flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            className="hidden"
+            checked={isLocked}
+            onChange={() => setIsLocked(!isLocked)}
+          />
+          <div className={`w-12 h-6 bg-gray-300 rounded-full relative`}>
+            <div
+              className={`w-5 h-5 bg-gray-600 rounded-full absolute top-0.5 transition-transform duration-300 ${
+                isLocked ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            ></div>
+          </div>
+          <span className="ml-2 text-sm font-semibold text-gray-600">
+            {isLocked ? 'Locked' : 'Unlocked'}
+          </span>
+        </label>
+      </div>
+
       <div className='flex'>
         <div className='w-1/3 p-4'>
           <ImportButton
@@ -69,6 +99,7 @@ function App() {
             setCourts={setCourts}
             currentStartIndex={currentStartIndex}
             updateStartIndex={updateStartIndex} // transferring start index
+            isLocked={isLocked} 
           ></Assignment>
         </div>
       </div>
