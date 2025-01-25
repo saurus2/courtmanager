@@ -120,13 +120,15 @@ function Assignment({
   
   function handleConfirmAssignments() {
     if (temporaryCourts.length === 0) {
-      alert('Assign players first before confirming!');
+      alert("Assign players first before confirming!");
       return;
     }
-
-    setCourts(temporaryCourts); // 임시 데이터를 실제 데이터로 반영
-    currentStartIndex.current = tempStartIndex;
-
+  
+    // 인덱스 변경 (Confirmation 시에만)
+    currentStartIndex.current =
+      (currentStartIndex.current + courts.filter((court) => court.isSelected).length * 4) %
+      players.length;
+  
     // 게임 횟수 업데이트
     const updatedPlayers = players.map((player) => {
       const isAssigned = temporaryCourts.some((court) =>
@@ -140,18 +142,17 @@ function Assignment({
       }
       return player;
     });
-
+  
     setPlayers(updatedPlayers);
-
+  
     // 로컬스토리지에 반영
-    localStorage.setItem('players', JSON.stringify(updatedPlayers));
-    localStorage.setItem('courts', JSON.stringify(temporaryCourts));
-
+    localStorage.setItem("players", JSON.stringify(updatedPlayers));
+    localStorage.setItem("courts", JSON.stringify(temporaryCourts));
+  
     // 임시 데이터 초기화
     setTemporaryCourts([...courts]);
-
-    setAssignClicked(false); // Cornfimation 버튼 비활성화
-  }
+    setAssignClicked(false); // Confirmation 버튼 비활성화
+  }  
 
   return (
     <div>

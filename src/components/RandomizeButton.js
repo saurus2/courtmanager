@@ -15,51 +15,48 @@ function RandomizeButton({
   const shouldBeDisabled = isCourtsUnavailable || isPlayersUnavailable;
 
   function handleRandomize() {
-    // 현재 시작 인덱스가 리스트 길이를 초과하지 않도록 조정
-    if (currentStartIndex.current >= totalPlayers) {
-      currentStartIndex.current = 0;
+    // 선택된 코트 필터링
+    const courtsAvailable = courts.filter((court) => court.isSelected);
+  
+    // 예외 처리: 선택된 코트가 없을 경우
+    if (courtsAvailable.length === 0) {
+      alert("No courts selected! Please select at least one court.");
+      return;
     }
-
-    const courtAssignments = {};
-    // Initializing court number
-    courtsAvailable.forEach((court) => {
-      courtAssignments[court.courtIndex] = []; // Initializing players on each court
-    });
-
-    // The number of player for handling
+  
+    // 예외 처리: 선택된 코트가 하나일 경우
+    if (courtsAvailable.length === 1) {
+      alert("Randomization is not necessary for a single court!");
+      return;
+    }
+  
+    // 예외 처리: 플레이어가 충분하지 않을 경우
     const batchSize = courtsAvailable.length * 4;
-
-    // Calculating index of the end of group
-    const endIndex = Math.min(
-      currentStartIndex.current + batchSize,
-      totalPlayers
-    );
-
-    // The player group for game now
-    const currentBatch = [
-      ...players.slice(currentStartIndex.current, endIndex),
-      ...players.slice(
-        0,
-        Math.max(0, currentStartIndex.current + batchSize - totalPlayers)
-      )
-    ];
-
-    // Mixing
-    const shuffledBatch = currentBatch.sort(() => Math.random() - 0.5);
-
-    shuffledBatch.forEach((player, index) => {
-      const courtIndex =
-        courtsAvailable[index % courtsAvailable.length].courtIndex;
+    if (players.length < batchSize) {
+      alert(`Not enough players to fill ${courtsAvailable.length} courts!`);
+      return;
+    }
+  
+    // 각 코트에 랜덤으로 플레이어 배치
+    const courtAssignments = {};
+    courtsAvailable.forEach((court) => {
+      courtAssignments[court.courtIndex] = [];
+    });
+  
+    // 현재 배치할 플레이어 그룹 (랜덤으로 섞기)
+    const currentBatch = players
+      .slice(currentStartIndex.current, currentStartIndex.current + batchSize)
+      .sort(() => Math.random() - 0.5);
+  
+    // 랜덤 배치
+    currentBatch.forEach((player, index) => {
+      const courtIndex = courtsAvailable[index % courtsAvailable.length].courtIndex;
       courtAssignments[courtIndex].push(player);
     });
-    
-    const newStartIndex =
-      (currentStartIndex.current + batchSize) % totalPlayers;
-    currentStartIndex.current = newStartIndex;
-    updateStartIndex(newStartIndex);
-    // setPlayers(updatedPlayers);
+  
+    // 코트 배치 결과 전달
     onAssignPlayers(courtAssignments);
-  }
+  }  
   return (
     <button
       className={`px-4 py-2 text-white font-semibold rounded-md shadow-md transition-all duration-200 ${

@@ -127,11 +127,9 @@ function StatusTable({ players, setPlayers, currentStartIndex }) {
     <div className='w-full h-full overflow-y-auto border border-gray-300 rounded-lg p-2 bg-white max-h-[800px]'>
       <table className='table-auto w-full text-left'>
         <thead>
-        <tr className='border-b'>
-        <th className='px-4 py-2 w-1/12'>ID</th> {/* ID 컬럼 폭 */}
-        <th className='px-4 py-2 w-5/12'>Name</th> {/* Name 컬럼 폭 */}
-        <th className='px-4 py-2 w-2/12 text-center'>Games</th> {/* Games 컬럼 (가운데 정렬) */}
-      </tr>
+          <tr className='border-b'>
+            <th className='px-4 py-2 w-1/12'>ID</th><th className='px-4 py-2 w-5/12'>Name</th><th className='px-4 py-2 w-2/12 text-center'>Games</th>
+          </tr>
         </thead>
         <tbody>
           {players.map((player) => (
