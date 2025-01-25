@@ -34,7 +34,7 @@ function Assignment({
   // 추가된 함수: 플레이어 선택 로직
   function handlePlayerClick(player, courtIndex = null) {
     const alreadySelected = selectedPlayers.find((p) => p.id === player.id);
-
+  
     if (alreadySelected) {
       // 이미 선택된 경우 해제
       setSelectedPlayers((prev) => prev.filter((p) => p.id !== player.id));
@@ -42,17 +42,19 @@ function Assignment({
       // 첫 번째로 선택된 코트
       const firstSelectedCourtIndex =
         selectedPlayers.length > 0 ? selectedPlayers[0].courtIndex : null;
-
-      // 같은 코트에서 두 번째 플레이어를 바로 선택하려고 할 때 무시
-      if (firstSelectedCourtIndex === courtIndex && selectedPlayers.length === 1) {
-        return; // 첫 번째 코트에서 두 번째 사람 선택을 방지
+  
+      // 같은 코트에서 두 번째 플레이어를 선택한 경우
+      if (firstSelectedCourtIndex === courtIndex) {
+        // 이전 선택된 사람 해제하고 새로 선택된 사람으로 교체
+        setSelectedPlayers([{ ...player, courtIndex }]);
+        return;
       }
-
+  
       // 같은 코트에서 이미 선택된 사람이 있을 경우 해당 사람 교체
       const sameCourtPlayerIndex = selectedPlayers.findIndex(
         (p) => p.courtIndex === courtIndex
       );
-
+  
       if (sameCourtPlayerIndex !== -1) {
         // 같은 코트에 선택된 사람이 있다면, 새로운 사람으로 교체
         const updatedSelection = [...selectedPlayers];
@@ -68,6 +70,7 @@ function Assignment({
       }
     }
   }
+  
 
   function onAssignPlayers(courtAssignments) {
     const updatedCourts = courts.map((court) => ({
