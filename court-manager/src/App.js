@@ -125,12 +125,7 @@ function App() {
             {/* Add New Player 버튼 */}
             <button
               onClick={openModal}
-              className={`px-3 py-1 flex items-center justify-center ${
-                players.length > 0
-                  ? 'bg-green-500 hover:bg-green-600'
-                  : 'bg-gray-300 cursor-default'
-              } text-white text-sm font-medium rounded-md shadow-md transition-all duration-200`}
-              disabled={players.length === 0}
+              className="px-3 py-1 flex items-center justify-center bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-md shadow-md transition-all duration-200"
             >
               Add New Player
             </button>
