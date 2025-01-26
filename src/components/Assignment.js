@@ -17,6 +17,11 @@ function Assignment({
   const [tempStartIndex, setTempStartIndex] = useState(currentStartIndex.current); // 임시 시작 인덱스
   const [assignClicked, setAssignClicked] = useState(false); // Assign players 클릭 여부
 
+  // 추가: 모달 상태 및 입력된 이름 관리
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newPlayerName, setNewPlayerName] = useState('');
+  const [selectedSinglePlayer, setSelectedSinglePlayer] = useState(null); // 한 명 선택된 사람
+
   // saving updated courts data on localStorage
   useEffect(() => {
     localStorage.setItem('courts', JSON.stringify(courts));
@@ -85,6 +90,13 @@ function Assignment({
   }
 
   function handleChangePlayers() {
+    if (selectedPlayers.length === 1) {
+      // 한 명 선택 시 모달 오픈
+      setSelectedSinglePlayer(selectedPlayers[0]); // 선택된 사람 저장
+      setIsModalOpen(true);
+      return;
+    }
+
     if (selectedPlayers.length !== 2) {
       alert('두 명의 플레이어를 선택해야 합니다.');
       return;
@@ -121,6 +133,143 @@ function Assignment({
     setSelectedPlayers([]);
   }
   
+  // 오리지날 
+  // // 모달에서 Change Players 버튼 클릭 시 동작
+  // function handleModalChange() {
+  //   if (!newPlayerName.trim()) {
+  //     alert('이름을 입력하세요.');
+  //     return;
+  //   }
+
+  //   setCourts((prevCourts) =>
+  //     prevCourts.map((court) => {
+  //       if (court.courtIndex === selectedSinglePlayer.courtIndex) {
+  //         const updatedPlayers = [...court.players];
+  //         const playerIndex = updatedPlayers.findIndex((p) => p.id === selectedSinglePlayer.id);
+
+  //         if (playerIndex !== -1) {
+  //           updatedPlayers[playerIndex] = { ...selectedSinglePlayer, name: newPlayerName };
+  //         }
+
+  //         return { ...court, players: updatedPlayers };
+  //       }
+  //       return court;
+  //     })
+  //   );
+
+  //   setIsModalOpen(false); // 모달 닫기
+  //   setSelectedPlayers([]);
+  // }
+
+  // 이름 넣기 됨 
+  // function handleModalChange() {
+  //   if (!newPlayerName.trim()) {
+  //     alert('이름을 입력하세요.');
+  //     return;
+  //   }
+  
+  //   const updatedCourts = courts.map((court) => {
+  //     if (court.courtIndex === selectedSinglePlayer.courtIndex) {
+  //       const updatedPlayers = [...court.players];
+  //       const playerIndex = updatedPlayers.findIndex((p) => p.id === selectedSinglePlayer.id);
+  
+  //       if (playerIndex !== -1) {
+  //         updatedPlayers[playerIndex] = { ...selectedSinglePlayer, name: newPlayerName };
+  //       }
+  
+  //       return { ...court, players: updatedPlayers };
+  //     }
+  //     return court;
+  //   });
+  
+  //   setCourts(updatedCourts); // courts 업데이트
+  //   setTemporaryCourts(updatedCourts); // temporaryCourts 동기화
+  
+  //   setIsModalOpen(false); // 모달 닫기
+  //   setSelectedPlayers([]); // 선택 초기화
+  // }
+  
+  function handleModalChange() {
+    if (!newPlayerName.trim()) {
+      alert('이름을 입력하세요.');
+      return;
+    }
+  
+    // courts 업데이트: ID를 기준으로 이름 업데이트
+    const updatedCourts = courts.map((court) => {
+      if (court.courtIndex === selectedSinglePlayer.courtIndex) {
+        const updatedPlayers = court.players.map((player) =>
+          player.id === selectedSinglePlayer.id
+            ? { ...player, name: newPlayerName } // 이름만 업데이트
+            : player
+        );
+        return { ...court, players: updatedPlayers };
+      }
+      return court;
+    });
+  
+    setCourts(updatedCourts); // courts 상태 업데이트
+    setTemporaryCourts(updatedCourts); // temporaryCourts 상태 동기화
+  
+    // players 업데이트: ID를 기준으로 이름 업데이트
+    const updatedPlayers = players.map((player) =>
+      player.id === selectedSinglePlayer.id
+        ? { ...player, name: newPlayerName } // 이름만 업데이트
+        : player
+    );
+  
+    setPlayers(updatedPlayers); // players 상태 업데이트
+    localStorage.setItem('players', JSON.stringify(updatedPlayers)); // 로컬스토리지 저장
+    localStorage.setItem('courts', JSON.stringify(updatedCourts)); // 로컬스토리지 저장
+  
+    setIsModalOpen(false); // 모달 닫기
+    setSelectedPlayers([]); // 선택 초기화
+  }
+  
+
+  // 모달에서 Cancel 버튼 클릭 시 동작
+  function handleModalCancel() {
+    setIsModalOpen(false); // 모달 닫기
+    setSelectedPlayers([]);
+  }
+
+  // // 플레이어 변경 안했을땐 잘됨
+  // function handleConfirmAssignments() {
+  //   if (temporaryCourts.length === 0) {
+  //     alert("Assign players first before confirming!");
+  //     return;
+  //   }
+  
+  //   // 인덱스 변경 (Confirmation 시에만)
+  //   currentStartIndex.current =
+  //     (currentStartIndex.current + courts.filter((court) => court.isSelected).length * 4) %
+  //     players.length;
+  
+  //   // 게임 횟수 업데이트
+  //   const updatedPlayers = players.map((player) => {
+  //     const isAssigned = temporaryCourts.some((court) =>
+  //       court.players.some((courtPlayer) => courtPlayer.id === player.id)
+  //     );
+  //     if (isAssigned) {
+  //       return {
+  //         ...player,
+  //         playingCount: (Number(player.playingCount) || 0) + 1
+  //       };
+  //     }
+  //     return player;
+  //   });
+  
+  //   setPlayers(updatedPlayers);
+  
+  //   // 로컬스토리지에 반영
+  //   localStorage.setItem("players", JSON.stringify(updatedPlayers));
+  //   localStorage.setItem("courts", JSON.stringify(temporaryCourts));
+  
+  //   // 임시 데이터 초기화
+  //   setTemporaryCourts([...courts]);
+  //   setAssignClicked(false); // Confirmation 버튼 비활성화
+  // }  
+
   function handleConfirmAssignments() {
     if (temporaryCourts.length === 0) {
       alert("Assign players first before confirming!");
@@ -131,6 +280,7 @@ function Assignment({
     currentStartIndex.current =
       (currentStartIndex.current + courts.filter((court) => court.isSelected).length * 4) %
       players.length;
+      
   
     // 게임 횟수 업데이트
     const updatedPlayers = players.map((player) => {
@@ -147,15 +297,17 @@ function Assignment({
     });
   
     setPlayers(updatedPlayers);
+    setCourts([...temporaryCourts]); // courts 동기화
   
     // 로컬스토리지에 반영
     localStorage.setItem("players", JSON.stringify(updatedPlayers));
     localStorage.setItem("courts", JSON.stringify(temporaryCourts));
   
     // 임시 데이터 초기화
-    setTemporaryCourts([...courts]);
+    setTemporaryCourts([...temporaryCourts]);
     setAssignClicked(false); // Confirmation 버튼 비활성화
-  }  
+  }
+  
 
   return (
     <div>
@@ -191,6 +343,34 @@ function Assignment({
         >
           Change Players
         </button>
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
+              <h2 className="text-lg font-bold mb-4">Change Player</h2>
+              <input
+                type="text"
+                value={newPlayerName}
+                onChange={(e) => setNewPlayerName(e.target.value)}
+                placeholder="Enter player name"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none"
+              />
+              <div className="flex justify-end space-x-4 mt-4">
+                <button
+                  onClick={handleModalCancel}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleModalChange}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md"
+                >
+                  Change Player
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         {/* Confirmation 버튼 추가 */}
         <button
           onClick={handleConfirmAssignments}

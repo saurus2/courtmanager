@@ -24,29 +24,34 @@ function RandomizeButton({
       return;
     }
   
-    // 예외 처리: 선택된 코트가 하나일 경우
-    if (courtsAvailable.length === 1) {
-      alert("Randomization is not necessary for a single court!");
-      return;
-    }
-  
-    // 예외 처리: 플레이어가 충분하지 않을 경우
     const batchSize = courtsAvailable.length * 4;
+    
+    // 예외 처리: 플레이어가 충분하지 않을 경우
     if (players.length < batchSize) {
       alert(`Not enough players to fill ${courtsAvailable.length} courts!`);
       return;
     }
-  
-    // 각 코트에 랜덤으로 플레이어 배치
+
+    const totalPlayers = players.length;
+    let currentBatch = [];
+
+    // 마지막 인덱스를 초과하는 경우 0부터 시작하도록 처리
+    if (currentStartIndex.current + batchSize > totalPlayers) {
+      const endSlice = players.slice(currentStartIndex.current); // 남은 부분
+      const startSlice = players.slice(0, (currentStartIndex.current + batchSize) % totalPlayers); // 초과 부분
+      currentBatch = [...endSlice, ...startSlice]; // 두 부분 합치기
+    } else {
+      currentBatch = players.slice(currentStartIndex.current, currentStartIndex.current + batchSize); // 일반 슬라이스
+    }
+
+    // 현재 배치할 그룹을 랜덤으로 섞기
+    currentBatch = currentBatch.sort(() => Math.random() - 0.5);
+
+    // 코트에 플레이어 배정
     const courtAssignments = {};
     courtsAvailable.forEach((court) => {
       courtAssignments[court.courtIndex] = [];
     });
-  
-    // 현재 배치할 플레이어 그룹 (랜덤으로 섞기)
-    const currentBatch = players
-      .slice(currentStartIndex.current, currentStartIndex.current + batchSize)
-      .sort(() => Math.random() - 0.5);
   
     // 랜덤 배치
     currentBatch.forEach((player, index) => {
