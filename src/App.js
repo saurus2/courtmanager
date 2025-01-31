@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import ImportButton from './components/ImportButton';
 import StatusTable from './components/StatusTable';
 import Assignment from './components/Assignment';
+import HowToUseButton from './components/HowToUseButton';
 
 function App() {
   // loading data from localStorage when components are mounted
@@ -87,6 +88,9 @@ function App() {
   return  (
     <div className='App p-8 relative'>
       <h1 className='text-4xl font-bold text-blue-500'>COURT MANAGER</h1>
+
+      {/* HowToUseButton 사용 장소*/}
+      <HowToUseButton /> {}
 
       {/* 토글 스위치 추가 */}
       <div className="absolute top-4 right-4">
