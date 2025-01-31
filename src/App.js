@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import ImportButton from './components/ImportButton';
 import StatusTable from './components/StatusTable';
 import Assignment from './components/Assignment';
+import SpecialPlayers from './components/SpecialPlayers';
 
 function App() {
   // loading data from localStorage when components are mounted
@@ -10,6 +11,9 @@ function App() {
     const savedPlayers = localStorage.getItem('players');
     return savedPlayers ? JSON.parse(savedPlayers) : [];
   });
+
+  // SpecialPlayers 컴포넌트의 ref 생성
+  const specialPlayersRef = useRef(null);
 
   const [courts, setCourts] = useState(() => {
     const savedCourts = localStorage.getItem('courts');
@@ -30,6 +34,25 @@ function App() {
   );
 
   const [isLocked, setIsLocked] = useState(false); // Lock 상태 관리
+
+  // Special List 관련 상태 추가
+  const [specialPlayers, setSpecialPlayers] = useState(() => {
+    const savedSpecialPlayers = localStorage.getItem('specialPlayers');
+    return savedSpecialPlayers ? JSON.parse(savedSpecialPlayers) : [];
+  });
+
+  const [isSpecialEnabled, setIsSpecialEnabled] = useState(() => {
+    return localStorage.getItem('isSpecialEnabled') === 'true';
+  });
+
+  // Special List 상태 로컬 스토리지 저장
+  useEffect(() => {
+    localStorage.setItem('specialPlayers', JSON.stringify(specialPlayers));
+  }, [specialPlayers]);
+
+  useEffect(() => {
+    localStorage.setItem('isSpecialEnabled', isSpecialEnabled.toString());
+  }, [isSpecialEnabled]);
 
   // saving data function
   useEffect(() => {
@@ -145,8 +168,50 @@ function App() {
             setCourts={setCourts}
             currentStartIndex={currentStartIndex}
             updateStartIndex={updateStartIndex} // transferring start index
-            isLocked={isLocked} 
+            isLocked={isLocked}
+            specialPlayers={specialPlayers} // SpecialPlayers 상태 전달
+            isSpecialEnabled={isSpecialEnabled} // SpecialPlayers 활성화 여부 전달
+            setSpecialPlayers={setSpecialPlayers} // SpecialPlayers 상태 업데이트 함수 전달
           ></Assignment>
+            {/* Special Players 리스트를 코트와 Assign 버튼 아래 배치 */}
+            <div className="mt-4">
+              {/* Special List 버튼 정렬 */}
+              <div className="flex items-center justify-between mb-2">
+                <h2 className='text-lg font-bold mb-2'>Special List</h2>
+                <div className='flex justify-between mb-2'>
+                  {/* 버튼 클릭 시 SpecialPlayers의 addSpecialPlayer 함수 호출 */}
+                  <button 
+                    onClick={() => specialPlayersRef.current?.addSpecialPlayer()} 
+                    className='bg-green-500 text-white px-4 py-2 rounded mr-4'
+                  >
+                    Add Special
+                  </button>
+                  <label className='flex items-center cursor-pointer'>
+                    <input
+                      type='checkbox'
+                      className='hidden'
+                      checked={isSpecialEnabled}
+                      onChange={() => setIsSpecialEnabled(!isSpecialEnabled)}
+                    />
+                    <div className='w-12 h-6 bg-gray-300 rounded-full relative'>
+                      <div className={`w-5 h-5 bg-gray-600 rounded-full absolute top-0.5 transition-transform duration-300 ${isSpecialEnabled ? 'translate-x-6' : 'translate-x-1'}`}></div>
+                    </div>
+                    <span className='ml-2 text-sm font-semibold text-gray-600'>
+                      {isSpecialEnabled ? 'On' : 'Off'}
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              {/* SpecialPlayers 컴포넌트 추가 (4명까지 보이도록 UI에서 조절) */}
+              <SpecialPlayers 
+                ref={specialPlayersRef} // ref 추가
+                specialPlayers={specialPlayers} 
+                setSpecialPlayers={setSpecialPlayers} 
+                isSpecialEnabled={isSpecialEnabled} 
+                setIsSpecialEnabled={setIsSpecialEnabled} 
+              />
+            </div>
         </div>
       </div>
       {/* 모달 코드 추가 */}
