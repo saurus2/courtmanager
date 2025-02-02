@@ -321,7 +321,7 @@ function Assignment({
 
   return (
     <div>
-      <div className='grid grid-cols-[repeat(auto-fit,_minmax(150px,_1fr))] gap-5'>
+      <div className='grid grid-cols-[repeat(auto-fit,_minmax(150px,_1fr))] gap-2'>
         {courts.map((court, i) => (
           <div key={i}>
             <Court

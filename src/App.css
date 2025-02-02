@@ -42,3 +42,11 @@
   transform: scale(0.66); /* 선택되지 않은 코트는 2/3 크기로 축소 */
   opacity: 0.8; /* 선택되지 않은 코트의 투명도를 살짝 조정 (선택 사항) */
 }
+
+.korean-name {
+  font-size: clamp(14px, 1.8vw, 20px); /* 한글 이름 더 크게 */
+}
+
+.english-name {
+  font-size: clamp(8px, 1.5vw, 11px); /* 영어 이름 기존 크기 유지 */
+}
