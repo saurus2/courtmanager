@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 
 function RandomizeButton({
   courts,
@@ -6,13 +6,30 @@ function RandomizeButton({
   setPlayers,
   onAssignPlayers,
   currentStartIndex,
-  updateStartIndex
+  updateStartIndex,
+  specialPlayers,
+  setSpecialPlayers,
+  isSpecialEnabled
 }) {
   const totalPlayers = players.length;
   const courtsAvailable = courts.filter((court) => court.isSelected);
   const isCourtsUnavailable = courtsAvailable.length === 0;
   const isPlayersUnavailable = totalPlayers === 0;
   const shouldBeDisabled = isCourtsUnavailable || isPlayersUnavailable;
+
+  // ✅ SpecialPlayers 변경 감지하여 최신 상태 반영 (setSpecialPlayers를 사용하도록 수정)
+  useEffect(() => {
+    const handleUpdate = () => {
+      const updatedSpecialPlayers = JSON.parse(localStorage.getItem('specialPlayers') || '[]');
+      setSpecialPlayers(updatedSpecialPlayers);
+    };
+
+    window.addEventListener('updateSpecialPlayers', handleUpdate);
+
+    return () => {
+      window.removeEventListener('updateSpecialPlayers', handleUpdate);
+    };
+  }, [setSpecialPlayers]);
 
   function handleRandomize() {
     // 선택된 코트 필터링
@@ -32,16 +49,28 @@ function RandomizeButton({
       return;
     }
 
-    const totalPlayers = players.length;
     let currentBatch = [];
 
-    // 마지막 인덱스를 초과하는 경우 0부터 시작하도록 처리
-    if (currentStartIndex.current + batchSize > totalPlayers) {
-      const endSlice = players.slice(currentStartIndex.current); // 남은 부분
-      const startSlice = players.slice(0, (currentStartIndex.current + batchSize) % totalPlayers); // 초과 부분
-      currentBatch = [...endSlice, ...startSlice]; // 두 부분 합치기
-    } else {
-      currentBatch = players.slice(currentStartIndex.current, currentStartIndex.current + batchSize); // 일반 슬라이스
+    // ✅ Special List 활성화된 경우, Special List 플레이어를 우선 배정
+    let assignedPlayers = [];
+    let playersToAssign = [...players];
+
+    if (isSpecialEnabled) {
+      assignedPlayers = [...specialPlayers]; // Special List 우선 배정
+    }
+
+    // ✅ Special List 플레이어가 먼저 배정됨
+    currentBatch = [...assignedPlayers];
+
+    // ✅ 기존 방식 유지: currentStartIndex를 활용하여 남은 슬롯 채우기
+    if (currentBatch.length < batchSize) {
+      if (currentStartIndex.current + (batchSize - currentBatch.length) > totalPlayers) {
+        const endSlice = playersToAssign.slice(currentStartIndex.current);
+        const startSlice = playersToAssign.slice(0, (batchSize - currentBatch.length) - endSlice.length);
+        currentBatch = [...currentBatch, ...endSlice, ...startSlice];
+      } else {
+        currentBatch = [...currentBatch, ...playersToAssign.slice(currentStartIndex.current, currentStartIndex.current + batchSize - currentBatch.length)];
+      }
     }
 
     // 현재 배치할 그룹을 랜덤으로 섞기

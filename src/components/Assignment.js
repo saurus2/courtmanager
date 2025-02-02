@@ -10,7 +10,10 @@ function Assignment({
   setCourts,
   currentStartIndex, 
   updateStartIndex,
-  isLocked
+  isLocked, 
+  specialPlayers,
+  setSpecialPlayers,
+  isSpecialEnabled
 }) {
   const [selectedPlayers, setSelectedPlayers] = useState([]);
   const [temporaryCourts, setTemporaryCourts] = useState([]); // 임시 코트 데이터
@@ -277,15 +280,22 @@ function Assignment({
     }
   
     // 인덱스 변경 (Confirmation 시에만)
-    currentStartIndex.current =
-      (currentStartIndex.current + courts.filter((court) => court.isSelected).length * 4) %
-      players.length;
-      
+    if (isSpecialEnabled) {
+      currentStartIndex.current = (currentStartIndex.current + (courts.filter((court) => court.isSelected).length * 4 - specialPlayers.length)) % players.length;
+    } else {
+      currentStartIndex.current = (currentStartIndex.current + courts.filter((court) => court.isSelected).length * 4) % players.length;
+    }
+    /*
+    1, 2, 
+    0 ~ 5
+    
+    
+    */
   
     // 게임 횟수 업데이트
     const updatedPlayers = players.map((player) => {
       const isAssigned = temporaryCourts.some((court) =>
-        court.players.some((courtPlayer) => courtPlayer.id === player.id)
+        court.players.some((courtPlayer) => courtPlayer.id === player.id && courtPlayer.name === player.name)
       );
       if (isAssigned) {
         return {
@@ -335,6 +345,9 @@ function Assignment({
           onAssignPlayers={onAssignPlayers}
           currentStartIndex={currentStartIndex}
           updateStartIndex={setTempStartIndex} // 임시 인덱스 업데이트
+          specialPlayers={specialPlayers} // ✅ Special List 전달
+          setSpecialPlayers={setSpecialPlayers} // ✅ setSpecialPlayers 전달 추가
+          isSpecialEnabled={isSpecialEnabled}
         ></RandomizeButton>
         {/* Change Players 버튼 추가 */}
         <button
