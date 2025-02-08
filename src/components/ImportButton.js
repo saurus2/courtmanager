@@ -1,16 +1,24 @@
 import * as XLSX from 'xlsx';
-import React, { Component } from 'react';
+import React from 'react';
 import moment from 'moment-timezone';
 
-const ImportButton = ({ shouldShowTestButton, setPlayers }) => {
+const ImportButton = ({ shouldShowTestButton, setPlayers, setCourts }) => {
+  // ID 생성 함수: 모든 플레이어 리스트에서 ID를 오름차순으로 생성
+  function assignSequentialIds(players) {
+    return players.map((player, index) => ({
+      ...player,
+      id: (index + 1).toString() // 오름차순 ID 생성 (1부터 시작)
+    }));
+  }
+
+  // 플레이어 정렬 및 ID 할당
   function getSortedPlayers(fileData) {
     const validPlayers = fileData.filter(
       (d) =>
         d['Checked In'] !== undefined &&
         (d['Checked In'] === 'Yes' || d['Checked In'] === 'No')
     );
-    const simplifiedPlayers = validPlayers.map((d, i) => ({
-      id: '00' + i,
+    const simplifiedPlayers = validPlayers.map((d) => ({
       name: d.Name,
       checkedIn: d['Checked In'] === 'Yes' ? 'Y' : 'N',
       checkInDate:
@@ -29,7 +37,6 @@ const ImportButton = ({ shouldShowTestButton, setPlayers }) => {
       if (b.checkInDate === '') {
         return -1; // b is empty, a comes first
       }
-      // Sort by checkInDate for valid dates
       return a.checkInDate - b.checkInDate;
     });
     return sortedPlayers;
@@ -51,11 +58,38 @@ const ImportButton = ({ shouldShowTestButton, setPlayers }) => {
         );
 
         const sortedPlayers = getSortedPlayers(filteredData);
-        setPlayers(sortedPlayers);
+
+        // 기존 플레이어와 병합 후 ID 재할당
+        setPlayers((prevPlayers) => {
+          const updatedPlayers = assignSequentialIds([
+            ...prevPlayers,
+            ...sortedPlayers
+          ]);
+          localStorage.setItem('players', JSON.stringify(updatedPlayers)); // LocalStorage에 저장
+          return updatedPlayers;
+        });
       };
       reader.readAsArrayBuffer(file);
     }
   };
+
+  // 데이터 초기화
+  const handleResetData = () => {
+    const confirmReset = window.confirm('Do you want to reset?');
+    if (confirmReset) {
+      localStorage.clear(); // LocalStorage 초기화
+      setPlayers([]); // 상태 초기화
+      setCourts((prevCourts) =>
+        prevCourts.map((court) => ({
+          ...court,
+          isSelected: false,
+          players: []
+        }))
+      );
+      window.location.reload(); // 페이지 새로고침
+    }
+  };
+
   const handleTestFile = async () => {
     const response = await fetch('/data/data_01.xlsx');
     const fileBlob = await response.blob();
@@ -69,6 +103,7 @@ const ImportButton = ({ shouldShowTestButton, setPlayers }) => {
     };
     handleFileChange(fakeEvent);
   };
+
   return (
     <div className='flex items-center space-x-4 mb-3'>
       <label
@@ -93,6 +128,12 @@ const ImportButton = ({ shouldShowTestButton, setPlayers }) => {
           Test Excel
         </button>
       )}
+      <button
+        onClick={handleResetData}
+        className='px-4 py-1 bg-red-500 text-white font-semibold rounded-md shadow-md hover:bg-red-600 transition-all duration-200 text-sm'
+      >
+        Reset Data
+      </button>
     </div>
   );
 };
