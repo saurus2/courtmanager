@@ -21,32 +21,3 @@
   pointer-events: none; /* 클릭 이벤트 방지 */
   filter: grayscale(100%);
 }
-
-.court-name {
-  font-size: clamp(12px, 1.5vw, 16px); /* 글자 크기 자동 조절 */
-  white-space: normal; /* 줄바꿈 허용 */
-  text-align: center; /* 줄바꿈 시 가운데 정렬 */
-  word-break: break-word; /* 긴 단어를 자동으로 나눔 */
-  line-height: 1.2; /* 줄 간격을 줄여서 공간 절약 */
-}
-
-.court {
-  transition: transform 0.3s ease; /* 크기 변경 시 부드러운 애니메이션 */
-}
-
-.court-selected {
-  transform: scale(1); /* 선택된 코트는 원래 크기 */
-}
-
-.court-unselected {
-  transform: scale(0.66); /* 선택되지 않은 코트는 2/3 크기로 축소 */
-  opacity: 0.8; /* 선택되지 않은 코트의 투명도를 살짝 조정 (선택 사항) */
-}
-
-.korean-name {
-  font-size: clamp(14px, 1.8vw, 20px); /* 한글 이름 더 크게 */
-}
-
-.english-name {
-  font-size: clamp(8px, 1.5vw, 11px); /* 영어 이름 기존 크기 유지 */
-}
