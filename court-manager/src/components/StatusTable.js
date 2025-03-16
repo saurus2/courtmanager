@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import { MdSportsTennis } from 'react-icons/md'; // ✅ 올바른 테니스공 아이콘 사용
 
-function StatusTable({ players, setPlayers, currentStartIndex }) {
+function StatusTable({ players, setPlayers, currentStartIndex, onSelectPlayer, playingStatus }) {
   // The information for view
   const [isModalOpen, setIsModalOpen] = useState(false); // 모달 창 상태
   const [newPlayerName, setNewPlayerName] = useState(''); // 새 플레이어 이름
@@ -51,41 +52,26 @@ function StatusTable({ players, setPlayers, currentStartIndex }) {
   };
 
   // Click player in the list handler
-  const handlePlayerClick = (playerId) => {
-    setSelectedPlayerId((prevId) => (prevId === playerId ? null : playerId));
+  const handlePlayerClick = (playerId, e) => {
+    e.stopPropagation(); // 🔴 이벤트 버블링 방지
+    // ✅ 이미 선택된 플레이어를 다시 클릭하면 해제
+    if (selectedPlayerId === playerId) {
+      setSelectedPlayerId(null); // 선택 해제
+      onSelectPlayer(null); // 상위 컴포넌트에서도 선택 해제
+      return;
+    }
+    setSelectedPlayerId(playerId); // 🔴 선택된 플레이어 UI 강조
+
+    const selectedPlayer = players.find((player) => player.id === playerId);
+    console.log("📌 StatusTable - 클릭한 플레이어:", selectedPlayer); // 🔴 디버깅용 로그 추가
+
+    if (onSelectPlayer) {
+      console.log("📌 StatusTable - onSelectPlayer 호출됨", selectedPlayer); // 🔴 디버깅용 로그 추가
+      onSelectPlayer(selectedPlayer);
+    } else {
+      console.log("⚠ StatusTable - onSelectPlayer가 정의되지 않음!"); // 🔴 onSelectPlayer가 없으면 경고 출력
+    }
   };
-
-  // // Open adding modal and close
-  // const openModal = () => setIsModalOpen(true);
-  // const closeModal = () => {
-  //   setIsModalOpen(false);
-  //   setNewPlayerName('');
-  // };
-
-  // // Adding player function
-  // const addPlayer = () => {
-  //   if (!newPlayerName.trim()) {
-  //     alert('Name cannot be empty!');
-  //     return;
-  //   }
-
-  //   // The last player checked-in ID
-  //   const maxId = players.reduce((max, player) => {
-  //     const idNum = parseInt(player.id, 10); // 숫자로 변환
-  //     return idNum > max ? idNum : max;
-  //   }, 0);
-
-  //   const newPlayer = {
-  //     id: (maxId + 1).toString(), // keep to add player with ID continuosly
-  //     name: newPlayerName.trim(),
-  //     checkedIn: 'Y',
-  //     checkInDate: new Date(), // Current time adding
-  //     playingCount: 0
-  //   };
-
-  //   setPlayers((prevPlayers) => [...prevPlayers, newPlayer]); // Adding the player in the list
-  //   closeModal(); // modal closing
-  // };
 
   // Removing player by '-' button
   const removeSelectedPlayer = () => {
@@ -128,14 +114,16 @@ function StatusTable({ players, setPlayers, currentStartIndex }) {
       <table className='table-auto w-full text-left'>
         <thead>
           <tr className='border-b'>
-            <th className='px-4 py-2 w-1/12'>ID</th><th className='px-4 py-2 w-5/12'>Name</th><th className='px-4 py-2 w-2/12 text-center'>Games</th>
+            <th className='px-4 py-2 w-1/12'>ID</th>
+            <th className='px-4 py-2 w-5/12'>Name</th>
+            <th className='px-4 py-2 w-2/12 text-center'>Games</th>
           </tr>
         </thead>
         <tbody>
           {players.map((player) => (
             <tr
               key={player.id}
-              onClick={() => setSelectedPlayerId(player.id)}
+              onClick={(e) => handlePlayerClick(player.id, e)}
               className={`cursor-pointer ${
                 selectedPlayerId === player.id
                   ? 'bg-blue-100 border-blue-500'
@@ -157,11 +145,11 @@ function StatusTable({ players, setPlayers, currentStartIndex }) {
                   player.id // 선택되지 않은 경우 ID 표시
                 )}
               </td>
-              <td className='px-4 py-2 overflow-hidden text-ellipsis truncate'>
-                {/[a-zA-Z]/.test(player.name) ? ( // 영어 이름인지 확인
-                  <span className='text-xs'>{player.name}</span> // 영어 이름일 경우 크기 축소
-                ) : (
-                  player.name // 한글 이름은 그대로 표시
+              {/* 🔥 수정됨: 이름 옆에 테니스공 아이콘 추가 */}
+              <td className='px-4 py-2 flex items-center'>
+                {player.name}
+                {playingStatus[player.id] && ( // 🔥 플레이 중이면 아이콘 표시
+                  <MdSportsTennis className="ml-2 text-green-500" />
                 )}
               </td>
               <td

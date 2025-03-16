@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import RandomizeButton from './RandomizeButton';
 import Court from './Court';
+import StatusTable from './StatusTable';
 
 function Assignment({ 
   numTotCourts, 
@@ -13,7 +14,11 @@ function Assignment({
   isLocked, 
   specialPlayers,
   setSpecialPlayers,
-  isSpecialEnabled
+  isSpecialEnabled,
+  selectedListPlayer, // 🔥 App.js에서 전달받음
+  setSelectedListPlayer, // 🔥 초기화 위해 전달받음
+  playingStatus, // 🔥 테니스공 아이콘 상태
+  setPlayingStatus // 🔥 상태 변경 함수
 }) {
   const [selectedPlayers, setSelectedPlayers] = useState([]);
   const [temporaryCourts, setTemporaryCourts] = useState([]); // 임시 코트 데이터
@@ -24,6 +29,18 @@ function Assignment({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
   const [selectedSinglePlayer, setSelectedSinglePlayer] = useState(null); // 한 명 선택된 사람
+  const [isChangeAllowed, setIsChangeAllowed] = useState(false); // 🔥 Change Players 버튼 활성화 여부
+
+
+  function handleListPlayerSelect(player) {
+    if (!player) {
+      console.log("⚠ handleListPlayerSelect - 받은 플레이어가 없음!"); // 🔴 디버깅 추가
+      return;
+    }
+
+    console.log("📌 Assignment - 선택된 리스트 플레이어:", player); // 🔴 디버깅 추가
+    setSelectedListPlayer(player);
+  }
 
   // saving updated courts data on localStorage
   useEffect(() => {
@@ -41,8 +58,11 @@ function Assignment({
 
   // 추가된 함수: 플레이어 선택 로직
   function handlePlayerClick(player, courtIndex = null) {
+    if (courtIndex === null) {
+      return;
+    }
+
     const alreadySelected = selectedPlayers.find((p) => p.id === player.id);
-  
     if (alreadySelected) {
       // 이미 선택된 경우 해제
       setSelectedPlayers((prev) => prev.filter((p) => p.id !== player.id));
@@ -79,6 +99,10 @@ function Assignment({
     }
   }
   
+  // 🔴 추가: 리스트에서 선택한 플레이어를 저장하는 함수
+  function handleListPlayerSelect(player) {
+    setSelectedListPlayer(player);
+  }
 
   function onAssignPlayers(courtAssignments) {
     const updatedCourts = courts.map((court) => ({
@@ -90,21 +114,72 @@ function Assignment({
     setCourts(updatedCourts); // 화면에 즉시 반영
     setTempStartIndex(currentStartIndex.current); // 임시 인덱스 저장
     setAssignClicked(true); // Assign players가 눌렸음을 표시
+
+    // 🔥 Assign 후 Change Players 버튼 활성화
+    setIsChangeAllowed(true);
   }
 
   function handleChangePlayers() {
-    if (selectedPlayers.length === 1) {
-      // 한 명 선택 시 모달 오픈
-      setSelectedSinglePlayer(selectedPlayers[0]); // 선택된 사람 저장
-      setIsModalOpen(true);
+    if (selectedListPlayer && selectedPlayers.length === 1) {
+      // ✅ 리스트에서 선택한 사람 + 코트에서 선택한 사람을 교체하는 로직 추가
+      const courtPlayer = selectedPlayers[0];
+
+      // ✅ 이미 코트에 있는 사람을 다시 넣으려고 하면 에러 처리
+      if (courts.some((court) => court.players.some((p) => p.name === selectedListPlayer.name))) {
+        alert("이미 코트에 있는 사람은 교체할 수 없습니다.");
+        return;
+      }
+
+      // ✅ 코트 업데이트: 기존 사람 제거 후 리스트의 사람 추가
+      setCourts((prevCourts) =>
+        prevCourts.map((court) =>
+          court.players.some((p) => p.id === courtPlayer.id)
+            ? {
+                ...court,
+                players: court.players.map((p) =>
+                  p.id === courtPlayer.id ? { ...selectedListPlayer } : p
+                )
+              }
+            : court
+        )
+      );
+
+      // ✅ 플레이어 리스트에서 게임 횟수 업데이트
+      setPlayers((prevPlayers) =>
+        prevPlayers.map((p) =>
+          p.id === selectedListPlayer.id
+            ? { ...p, playingCount: Number(p.playingCount) + 1 } // 🔥 숫자로 변환 후 증가
+            : p.id === courtPlayer.id
+            ? { ...p, playingCount: Math.max(Number(p.playingCount) - 1, 0) } // 🔥 숫자로 변환 후 감소
+            : p
+        )
+      );
+
+      // ✅ playingStatus 업데이트
+      setPlayingStatus(prevStatus => {
+        const newStatus = { ...prevStatus };
+        newStatus[selectedListPlayer.id] = true; // 새로 들어간 사람은 표시
+        delete newStatus[courtPlayer.id]; // 나간 사람은 제거
+        return newStatus;
+      });
+
+      // ✅ LocalStorage 업데이트
+      localStorage.setItem("players", JSON.stringify(players));
+      localStorage.setItem("courts", JSON.stringify(courts));
+      localStorage.setItem("playingStatus", JSON.stringify(playingStatus));
+
+      // 선택 초기화
+      setSelectedListPlayer(null);
+      setSelectedPlayers([]);
       return;
     }
 
+    // 기존 로직: 코트 내 두 명을 교체하는 기능 유지
     if (selectedPlayers.length !== 2) {
-      alert('두 명의 플레이어를 선택해야 합니다.');
+      alert("두 명의 플레이어를 선택해야 합니다.");
       return;
     }
-  
+
     const [player1, player2] = selectedPlayers;
   
     setCourts((prevCourts) => {
@@ -135,62 +210,6 @@ function Assignment({
     // 선택 초기화
     setSelectedPlayers([]);
   }
-  
-  // 오리지날 
-  // // 모달에서 Change Players 버튼 클릭 시 동작
-  // function handleModalChange() {
-  //   if (!newPlayerName.trim()) {
-  //     alert('이름을 입력하세요.');
-  //     return;
-  //   }
-
-  //   setCourts((prevCourts) =>
-  //     prevCourts.map((court) => {
-  //       if (court.courtIndex === selectedSinglePlayer.courtIndex) {
-  //         const updatedPlayers = [...court.players];
-  //         const playerIndex = updatedPlayers.findIndex((p) => p.id === selectedSinglePlayer.id);
-
-  //         if (playerIndex !== -1) {
-  //           updatedPlayers[playerIndex] = { ...selectedSinglePlayer, name: newPlayerName };
-  //         }
-
-  //         return { ...court, players: updatedPlayers };
-  //       }
-  //       return court;
-  //     })
-  //   );
-
-  //   setIsModalOpen(false); // 모달 닫기
-  //   setSelectedPlayers([]);
-  // }
-
-  // 이름 넣기 됨 
-  // function handleModalChange() {
-  //   if (!newPlayerName.trim()) {
-  //     alert('이름을 입력하세요.');
-  //     return;
-  //   }
-  
-  //   const updatedCourts = courts.map((court) => {
-  //     if (court.courtIndex === selectedSinglePlayer.courtIndex) {
-  //       const updatedPlayers = [...court.players];
-  //       const playerIndex = updatedPlayers.findIndex((p) => p.id === selectedSinglePlayer.id);
-  
-  //       if (playerIndex !== -1) {
-  //         updatedPlayers[playerIndex] = { ...selectedSinglePlayer, name: newPlayerName };
-  //       }
-  
-  //       return { ...court, players: updatedPlayers };
-  //     }
-  //     return court;
-  //   });
-  
-  //   setCourts(updatedCourts); // courts 업데이트
-  //   setTemporaryCourts(updatedCourts); // temporaryCourts 동기화
-  
-  //   setIsModalOpen(false); // 모달 닫기
-  //   setSelectedPlayers([]); // 선택 초기화
-  // }
   
   function handleModalChange() {
     if (!newPlayerName.trim()) {
@@ -236,61 +255,37 @@ function Assignment({
     setSelectedPlayers([]);
   }
 
-  // // 플레이어 변경 안했을땐 잘됨
-  // function handleConfirmAssignments() {
-  //   if (temporaryCourts.length === 0) {
-  //     alert("Assign players first before confirming!");
-  //     return;
-  //   }
-  
-  //   // 인덱스 변경 (Confirmation 시에만)
-  //   currentStartIndex.current =
-  //     (currentStartIndex.current + courts.filter((court) => court.isSelected).length * 4) %
-  //     players.length;
-  
-  //   // 게임 횟수 업데이트
-  //   const updatedPlayers = players.map((player) => {
-  //     const isAssigned = temporaryCourts.some((court) =>
-  //       court.players.some((courtPlayer) => courtPlayer.id === player.id)
-  //     );
-  //     if (isAssigned) {
-  //       return {
-  //         ...player,
-  //         playingCount: (Number(player.playingCount) || 0) + 1
-  //       };
-  //     }
-  //     return player;
-  //   });
-  
-  //   setPlayers(updatedPlayers);
-  
-  //   // 로컬스토리지에 반영
-  //   localStorage.setItem("players", JSON.stringify(updatedPlayers));
-  //   localStorage.setItem("courts", JSON.stringify(temporaryCourts));
-  
-  //   // 임시 데이터 초기화
-  //   setTemporaryCourts([...courts]);
-  //   setAssignClicked(false); // Confirmation 버튼 비활성화
-  // }  
-
   function handleConfirmAssignments() {
     if (temporaryCourts.length === 0) {
       alert("Assign players first before confirming!");
       return;
     }
-  
+    
+    setIsChangeAllowed(false); // 🔥 Confirmation 후 Change Players 버튼 비활성화
+
+    // ✅ 기존 데이터 유지 (localStorage에서 불러오기)
+    const savedStatus = JSON.parse(localStorage.getItem("playingStatus")) || {};
+    // 🔥 Assign 후 Change Players 버튼 비활성화
+    setIsChangeAllowed(false);
+    // 🔥 이전 상태를 모두 지우고, 현재 코트에서 뛰는 사람만 저장
+    const updatedPlayingStatus = {};
+
+    // ✅ 현재 코트에 있는 사람들만 playingStatus에 추가
+    courts.forEach(court => {
+      court.players.forEach(player => {
+        updatedPlayingStatus[player.id] = true; // ✅ 새 플레이어 추가
+      });
+    });
+
+    setPlayingStatus(updatedPlayingStatus); // 상태 업데이트
+    localStorage.setItem("playingStatus", JSON.stringify(updatedPlayingStatus)); // ✅ localStorage에도 반영
+
     // 인덱스 변경 (Confirmation 시에만)
     if (isSpecialEnabled) {
       currentStartIndex.current = (currentStartIndex.current + (courts.filter((court) => court.isSelected).length * 4 - specialPlayers.length)) % players.length;
     } else {
       currentStartIndex.current = (currentStartIndex.current + courts.filter((court) => court.isSelected).length * 4) % players.length;
     }
-    /*
-    1, 2, 
-    0 ~ 5
-    
-    
-    */
   
     // 게임 횟수 업데이트
     const updatedPlayers = players.map((player) => {
@@ -300,7 +295,7 @@ function Assignment({
       if (isAssigned) {
         return {
           ...player,
-          playingCount: (Number(player.playingCount) || 0) + 1
+          playingCount: Number(player.playingCount) + 1 // 🔥 숫자로 변환 후 증가
         };
       }
       return player;
@@ -351,8 +346,11 @@ function Assignment({
         ></RandomizeButton>
         {/* Change Players 버튼 추가 */}
         <button
-          onClick={handleChangePlayers}
-          className='px-4 py-2 bg-green-500 text-white rounded-md ml-2'
+            onClick={handleChangePlayers}
+            disabled={!isChangeAllowed} // 🔥 상태를 반영하여 활성화/비활성화
+            className={`px-4 py-2 rounded-md ml-2 ${
+              isChangeAllowed ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
         >
           Change Players
         </button>
