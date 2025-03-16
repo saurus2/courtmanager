@@ -14,6 +14,12 @@ function App() {
     return savedPlayers ? JSON.parse(savedPlayers) : [];
   });
 
+  const [selectedListPlayer, setSelectedListPlayer] = useState(null); // 🔥 App.js에서 관리
+  const [playingStatus, setPlayingStatus] = useState(() => {
+    const savedStatus = localStorage.getItem("playingStatus");
+    return savedStatus ? JSON.parse(savedStatus) : {};
+  });
+
   // SpecialPlayers 컴포넌트의 ref 생성
   const specialPlayersRef = useRef(null);
 
@@ -64,6 +70,19 @@ function App() {
   useEffect(() => {
     localStorage.setItem('courts', JSON.stringify(courts));
   }, [courts]);
+
+  // ✅ 새로고침해도 `playingStatus` 유지
+  useEffect(() => {
+    const savedStatus = localStorage.getItem("playingStatus");
+    if (savedStatus) {
+      setPlayingStatus(JSON.parse(savedStatus));
+    }
+  }, []);
+
+  // ✅ `playingStatus`가 변경될 때마다 `localStorage`에 저장
+  useEffect(() => {
+    localStorage.setItem("playingStatus", JSON.stringify(playingStatus));
+  }, [playingStatus]);
 
   // saving changed currentStartIndex on localStorage
   const updateStartIndex = (newIndex) => {
@@ -162,6 +181,8 @@ function App() {
             players={players}
             setPlayers={setPlayers}
             currentStartIndex={currentStartIndex}
+            onSelectPlayer={setSelectedListPlayer} // 🔥 리스트에서 선택한 플레이어 상태 업데이트
+            playingStatus={playingStatus} // 🔥 상태 전달
           />
         </div>
         <div className='w-2/3 p-4'>
@@ -177,6 +198,10 @@ function App() {
             specialPlayers={specialPlayers} // SpecialPlayers 상태 전달
             isSpecialEnabled={isSpecialEnabled} // SpecialPlayers 활성화 여부 전달
             setSpecialPlayers={setSpecialPlayers} // SpecialPlayers 상태 업데이트 함수 전달
+            selectedListPlayer={selectedListPlayer} // 🔥 Assignment에 전달
+            setSelectedListPlayer={setSelectedListPlayer} // 🔥 Assignment에서 초기화 가능하게 전달
+            playingStatus={playingStatus} // 🔥 상태 전달
+            setPlayingStatus={setPlayingStatus} // 🔥 상태 변경 함수 전달
           ></Assignment>
             {/* Special Players 리스트를 코트와 Assign 버튼 아래 배치 */}
             <div className="mt-4">
