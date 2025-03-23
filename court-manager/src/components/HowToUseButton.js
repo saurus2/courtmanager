@@ -15,7 +15,7 @@ function HowToUseButton() {
     <div>
       <button
         onClick={openModal}
-        className="fixed top-10 right-4 w-11 h-11 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-lg z-50"
+        className="fixed bottom-4 right-4 w-11 h-11 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-lg z-50"
         style={{ fontSize: '2rem' }}
       >
         ?
