@@ -21,8 +21,8 @@ function Assignment({
   setPlayingStatus // 🔥 상태 변경 함수
 }) {
   const [selectedPlayers, setSelectedPlayers] = useState([]);
-  const [temporaryCourts, setTemporaryCourts] = useState([]); // 임시 코트 데이터
-  const [tempStartIndex, setTempStartIndex] = useState(currentStartIndex.current); // 임시 시작 인덱스
+  // const [temporaryCourts, setTemporaryCourts] = useState([]); // 임시 코트 데이터
+  // const [tempStartIndex, setTempStartIndex] = useState(currentStartIndex.current); // 임시 시작 인덱스
   const [assignClicked, setAssignClicked] = useState(false); // Assign players 클릭 여부
 
   // 추가: 모달 상태 및 입력된 이름 관리
@@ -32,15 +32,15 @@ function Assignment({
   const [isChangeAllowed, setIsChangeAllowed] = useState(false); // 🔥 Change Players 버튼 활성화 여부
 
 
-  function handleListPlayerSelect(player) {
-    if (!player) {
-      console.log("⚠ handleListPlayerSelect - 받은 플레이어가 없음!"); // 🔴 디버깅 추가
-      return;
-    }
+  // function handleListPlayerSelect(player) {
+  //   if (!player) {
+  //     console.log("⚠ handleListPlayerSelect - 받은 플레이어가 없음!"); // 🔴 디버깅 추가
+  //     return;
+  //   }
 
-    console.log("📌 Assignment - 선택된 리스트 플레이어:", player); // 🔴 디버깅 추가
-    setSelectedListPlayer(player);
-  }
+  //   console.log("📌 Assignment - 선택된 리스트 플레이어:", player); // 🔴 디버깅 추가
+  //   setSelectedListPlayer(player);
+  // }
 
   // saving updated courts data on localStorage
   useEffect(() => {
@@ -100,9 +100,9 @@ function Assignment({
   }
   
   // 🔴 추가: 리스트에서 선택한 플레이어를 저장하는 함수
-  function handleListPlayerSelect(player) {
-    setSelectedListPlayer(player);
-  }
+  // function handleListPlayerSelect(player) {
+  //   setSelectedListPlayer(player);
+  // }
 
   function onAssignPlayers(courtAssignments) {
     const updatedCourts = courts.map((court) => ({
@@ -110,10 +110,11 @@ function Assignment({
       players: courtAssignments[court.courtIndex] || []
     }));
     // 임시 코트 데이터에 저장 (화면에도 즉시 반영)
-    setTemporaryCourts(updatedCourts);
+    // setTemporaryCourts(updatedCourts);
     setCourts(updatedCourts); // 화면에 즉시 반영
-    setTempStartIndex(currentStartIndex.current); // 임시 인덱스 저장
+    // setTempStartIndex(currentStartIndex.current); // 임시 인덱스 저장
     setAssignClicked(true); // Assign players가 눌렸음을 표시
+    setIsChangeAllowed(true); // Change Players 버튼 활성화
 
     // 🔥 Assign 후 Change Players 버튼 활성화
     setIsChangeAllowed(true);
@@ -144,29 +145,8 @@ function Assignment({
         )
       );
 
-      // ✅ 플레이어 리스트에서 게임 횟수 업데이트
-      setPlayers((prevPlayers) =>
-        prevPlayers.map((p) =>
-          p.id === selectedListPlayer.id
-            ? { ...p, playingCount: Number(p.playingCount) + 1 } // 🔥 숫자로 변환 후 증가
-            : p.id === courtPlayer.id
-            ? { ...p, playingCount: Math.max(Number(p.playingCount) - 1, 0) } // 🔥 숫자로 변환 후 감소
-            : p
-        )
-      );
-
-      // ✅ playingStatus 업데이트
-      setPlayingStatus(prevStatus => {
-        const newStatus = { ...prevStatus };
-        newStatus[selectedListPlayer.id] = true; // 새로 들어간 사람은 표시
-        delete newStatus[courtPlayer.id]; // 나간 사람은 제거
-        return newStatus;
-      });
-
       // ✅ LocalStorage 업데이트
-      localStorage.setItem("players", JSON.stringify(players));
       localStorage.setItem("courts", JSON.stringify(courts));
-      localStorage.setItem("playingStatus", JSON.stringify(playingStatus));
 
       // 선택 초기화
       setSelectedListPlayer(null);
@@ -231,7 +211,7 @@ function Assignment({
     });
   
     setCourts(updatedCourts); // courts 상태 업데이트
-    setTemporaryCourts(updatedCourts); // temporaryCourts 상태 동기화
+    // setTemporaryCourts(updatedCourts); // temporaryCourts 상태 동기화
   
     // players 업데이트: ID를 기준으로 이름 업데이트
     const updatedPlayers = players.map((player) =>
@@ -256,7 +236,7 @@ function Assignment({
   }
 
   function handleConfirmAssignments() {
-    if (temporaryCourts.length === 0) {
+    if (!assignClicked) {
       alert("Assign players first before confirming!");
       return;
     }
@@ -289,27 +269,33 @@ function Assignment({
   
     // 게임 횟수 업데이트
     const updatedPlayers = players.map((player) => {
-      const isAssigned = temporaryCourts.some((court) =>
+      const isCurrentlyAssigned = courts.some((court) =>
         court.players.some((courtPlayer) => courtPlayer.id === player.id && courtPlayer.name === player.name)
       );
-      if (isAssigned) {
-        return {
-          ...player,
-          playingCount: Number(player.playingCount) + 1 // 🔥 숫자로 변환 후 증가
-        };
+      // "Change Players"로 이미 교체된 경우, 추가로 증가시키지 않음
+      if (isCurrentlyAssigned && updatedPlayingStatus[player.id]) {
+        // 🔥 리스트에서 코트로 들어온 플레이어는 이미 handleChangePlayers에서 +1 했으므로,
+        // 🔥 여기서는 추가 증가를 하지 않도록 조건 확인
+        const wasAlreadyCounted = player.playingCount > 0 && !savedStatus[player.id];
+        if (!wasAlreadyCounted) {
+          return {
+            ...player,
+            playingCount: Number(player.playingCount) + 1 // 🔥 현재 코트에 있는 경우만 +1
+          };
+        }
       }
       return player;
     });
   
     setPlayers(updatedPlayers);
-    setCourts([...temporaryCourts]); // courts 동기화
+    // setCourts([...temporaryCourts]); // courts 동기화
   
     // 로컬스토리지에 반영
     localStorage.setItem("players", JSON.stringify(updatedPlayers));
-    localStorage.setItem("courts", JSON.stringify(temporaryCourts));
+    localStorage.setItem("courts", JSON.stringify(courts));
   
     // 임시 데이터 초기화
-    setTemporaryCourts([...temporaryCourts]);
+    // setTemporaryCourts([...temporaryCourts]);
     setAssignClicked(false); // Confirmation 버튼 비활성화
   }
   
@@ -339,7 +325,7 @@ function Assignment({
           setPlayers={setPlayers}
           onAssignPlayers={onAssignPlayers}
           currentStartIndex={currentStartIndex}
-          updateStartIndex={setTempStartIndex} // 임시 인덱스 업데이트
+          updateStartIndex={updateStartIndex} // 🔥 tempStartIndex 대신 updateStartIndex 사용
           specialPlayers={specialPlayers} // ✅ Special List 전달
           setSpecialPlayers={setSpecialPlayers} // ✅ setSpecialPlayers 전달 추가
           isSpecialEnabled={isSpecialEnabled}
