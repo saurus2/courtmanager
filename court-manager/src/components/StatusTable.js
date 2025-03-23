@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { MdSportsTennis } from 'react-icons/md'; // ✅ 올바른 테니스공 아이콘 사용
+import { FaRegTrashAlt } from 'react-icons/fa'; // trash bin
 
 function StatusTable({ players, setPlayers, currentStartIndex, onSelectPlayer, playingStatus }) {
   // The information for view
@@ -124,7 +125,7 @@ function StatusTable({ players, setPlayers, currentStartIndex, onSelectPlayer, p
             <tr
               key={player.id}
               onClick={(e) => handlePlayerClick(player.id, e)}
-              className={`cursor-pointer ${
+              className={`cursor-pointer h-12 ${
                 selectedPlayerId === player.id
                   ? 'bg-blue-100 border-blue-500'
                   : 'hover:bg-gray-100'
@@ -132,24 +133,24 @@ function StatusTable({ players, setPlayers, currentStartIndex, onSelectPlayer, p
             >
               <td className='px-4 py-2 text-center'>
                 {selectedPlayerId === player.id ? ( // 플레이어 선택 여부에 따라
-                  <button
-                    className='px-2 py-1 bg-red-500 text-white rounded-md'
+                    <button
+                    className='px-2 py-1 bg-[#DDA8A0] text-white rounded-md flex items-center justify-center'
                     onClick={(e) => {
-                      e.stopPropagation(); // 부모 클릭 이벤트 방지
-                      removeSelectedPlayer(); // 플레이어 삭제
+                      e.stopPropagation();
+                      removeSelectedPlayer();
                     }}
                   >
-                    -
+                    <FaRegTrashAlt className='text-white' />
                   </button>
                 ) : (
                   player.id // 선택되지 않은 경우 ID 표시
                 )}
               </td>
               {/* 🔥 수정됨: 이름 옆에 테니스공 아이콘 추가 */}
-              <td className='px-4 py-2 flex items-center'>
-                {player.name}
-                {playingStatus[player.id] && ( // 🔥 플레이 중이면 아이콘 표시
-                  <MdSportsTennis className="ml-2 text-green-500" />
+              <td className='px-4 py-2 flex items-center justify-between'>
+                <span className='leading-none align-middle translate-y-1.5'>{player.name}</span>
+                {playingStatus[player.id] && (
+                  <MdSportsTennis className="text-green-500 w-5 h-5 translate-y-1.5" />
                 )}
               </td>
               <td
