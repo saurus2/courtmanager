@@ -53,6 +53,12 @@ function App() {
     return localStorage.getItem('isSpecialEnabled') === 'true';
   });
 
+  // 🔥🔥🔥 새로 추가: Assignment 상태 관리
+  const [assignStatus, setAssignStatus] = useState({
+    assignClicked: false,
+    isRollbackAllowed: false
+  });
+
   // Special List 상태 로컬 스토리지 저장
   useEffect(() => {
     localStorage.setItem('specialPlayers', JSON.stringify(specialPlayers));
@@ -183,6 +189,8 @@ function App() {
             currentStartIndex={currentStartIndex}
             onSelectPlayer={setSelectedListPlayer} // 🔥 리스트에서 선택한 플레이어 상태 업데이트
             playingStatus={playingStatus} // 🔥 상태 전달
+            assignClicked={assignStatus.assignClicked} // 🔥🔥🔥 새로 추가: assignClicked 전달
+            isRollbackAllowed={assignStatus.isRollbackAllowed} // 🔥🔥🔥 새로 추가: isRollbackAllowed 전달
           />
         </div>
         <div className='w-2/3 p-4'>
@@ -202,6 +210,8 @@ function App() {
             setSelectedListPlayer={setSelectedListPlayer} // 🔥 Assignment에서 초기화 가능하게 전달
             playingStatus={playingStatus} // 🔥 상태 전달
             setPlayingStatus={setPlayingStatus} // 🔥 상태 변경 함수 전달
+            onSelectPlayer={setSelectedListPlayer}
+            onAssignStatusChange={setAssignStatus} // 🔥🔥🔥 새로 추가: 상태 변경 callback 전달
           ></Assignment>
             {/* Special Players 리스트를 코트와 Assign 버튼 아래 배치 */}
             <div className="mt-4">

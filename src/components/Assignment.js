@@ -19,7 +19,8 @@ function Assignment({
   selectedListPlayer, // 🔥 App.js에서 전달받음
   setSelectedListPlayer, // 🔥 초기화 위해 전달받음
   playingStatus, // 🔥 테니스공 아이콘 상태
-  setPlayingStatus // 🔥 상태 변경 함수
+  setPlayingStatus, // 🔥 상태 변경 함수
+  onAssignStatusChange // 🔥🔥🔥 새로 추가: 상태 전달용 callback
 }) {
   const [selectedPlayers, setSelectedPlayers] = useState([]);
   // const [temporaryCourts, setTemporaryCourts] = useState([]); // 임시 코트 데이터
@@ -42,6 +43,13 @@ function Assignment({
   useEffect(() => {
     localStorage.setItem('courts', JSON.stringify(courts));
   }, [courts]);
+
+  // 🔥🔥🔥 새로 추가: assignClicked와 isRollbackAllowed 상태 변경 시 상위로 전달
+  useEffect(() => {
+    if (onAssignStatusChange) {
+      onAssignStatusChange({ assignClicked, isRollbackAllowed });
+    }
+  }, [assignClicked, isRollbackAllowed, onAssignStatusChange]);
 
   function onCourtSelected(courtIndex) {
     if (isLocked) return; 
@@ -107,6 +115,7 @@ function Assignment({
     setRollbackPlayers([...players]); // 롤백용 players 상태 저장
     setAssignClicked(true); // Assign players가 눌렸음을 표시
     setIsChangeAllowed(true); // Change Players 버튼 활성화
+    setIsRollbackAllowed(false); // 🔥🔥🔥 수정됨: Assign 시 isRollbackAllowed 리셋
   }
 
   function handleChangePlayers() {
