@@ -2,13 +2,25 @@ import React, { useState } from 'react';
 import { MdSportsTennis } from 'react-icons/md'; // ✅ 올바른 테니스공 아이콘 사용
 import { FaRegTrashAlt } from 'react-icons/fa'; // trash bin
 
-function StatusTable({ players, setPlayers, currentStartIndex, onSelectPlayer, playingStatus }) {
+function StatusTable({ 
+  players, 
+  setPlayers, 
+  currentStartIndex, 
+  onSelectPlayer, 
+  playingStatus,
+  assignClicked, // 🔥🔥🔥 새로 추가: Assign 상태
+  isRollbackAllowed // 🔥🔥🔥 새로 추가: Rollback 상태
+}) {
   // The information for view
   const [isModalOpen, setIsModalOpen] = useState(false); // 모달 창 상태
   const [newPlayerName, setNewPlayerName] = useState(''); // 새 플레이어 이름
   const [selectedPlayerId, setSelectedPlayerId] = useState(null);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [searchName, setSearchName] = useState(''); // 검색 이름
+  // 🔥🔥🔥 새로 추가: 드래그 중인 플레이어 추적
+  const [draggedPlayer, setDraggedPlayer] = useState(null);
+  // 🔥🔥🔥 새로 추가: 드래그 상태 추적
+  const [isDragging, setIsDragging] = useState(false);
 
   const updatePlayingCount = (playerId, increment) => {
     const updatedPlayers = players.map((player) => {
@@ -55,6 +67,8 @@ function StatusTable({ players, setPlayers, currentStartIndex, onSelectPlayer, p
   // Click player in the list handler
   const handlePlayerClick = (playerId, e) => {
     e.stopPropagation(); // 🔴 이벤트 버블링 방지
+    // 🔥🔥🔥 수정됨: 드래그 중에는 클릭 이벤트 무시
+    if (isDragging) return;
     // ✅ 이미 선택된 플레이어를 다시 클릭하면 해제
     if (selectedPlayerId === playerId) {
       setSelectedPlayerId(null); // 선택 해제
@@ -110,6 +124,63 @@ function StatusTable({ players, setPlayers, currentStartIndex, onSelectPlayer, p
     return date.toLocaleTimeString('en-US', options);
   }
 
+  // 🔥🔥🔥 새로 추가: 드래그 시작 시 호출
+  const handleDragStart = (e, player) => {
+    // 🔥🔥🔥 수정됨: 드래그 가능 여부 확인 및 이벤트 중단
+    if (assignClicked && !isRollbackAllowed) {
+      e.preventDefault();
+      e.stopPropagation();
+      alert("Assignment 후에는 순서를 바꿀 수 없습니다.");
+      return false;
+    }
+    setDraggedPlayer(player);
+    setIsDragging(true); // 🔥🔥🔥 수정됨: 드래그 시작 시 상태 설정
+    e.dataTransfer.setData('text/plain', player.id);
+    return true;
+  };
+
+  // 🔥🔥🔥 새로 추가: 드래그 오버 시 호출
+  const handleDragOver = (e) => {
+    // 🔥🔥🔥 수정됨: 드래그 가능 여부 확인
+    if (assignClicked && !isRollbackAllowed) {
+      return;
+    }
+    e.preventDefault();
+  };
+
+  // 🔥🔥🔥 새로 추가: 드롭 시 호출
+  const handleDrop = (e, targetPlayer) => {
+    e.preventDefault();
+    if (assignClicked && !isRollbackAllowed) {
+      return;
+    }
+    if (!draggedPlayer || draggedPlayer.id === targetPlayer.id) return;
+
+    const newPlayers = [...players];
+    const draggedIndex = newPlayers.findIndex(p => p.id === draggedPlayer.id);
+    const targetIndex = newPlayers.findIndex(p => p.id === targetPlayer.id);
+
+    // 배열에서 드래그된 플레이어를 제거하고 대상 위치에 삽입
+    newPlayers.splice(draggedIndex, 1);
+    newPlayers.splice(targetIndex, 0, draggedPlayer);
+
+    // id를 순서에 맞게 재설정 (1부터 순차적으로)
+    const updatedPlayers = newPlayers.map((player, index) => ({
+      ...player,
+      id: (index + 1).toString()
+    }));
+
+    setPlayers(updatedPlayers);
+    localStorage.setItem('players', JSON.stringify(updatedPlayers));
+    setDraggedPlayer(null);
+    setIsDragging(false); // 🔥🔥🔥 수정됨: 드롭 후 드래그 상태 해제
+  };
+  
+  // 🔥🔥🔥 새로 추가: 드래그 종료 시 호출
+  const handleDragEnd = () => {
+    setIsDragging(false);
+  };
+
   return (
     <div className='w-full h-full overflow-y-auto border border-gray-300 rounded-lg p-2 bg-white max-h-[800px]'>
       <table className='table-auto w-full text-left'>
@@ -129,7 +200,12 @@ function StatusTable({ players, setPlayers, currentStartIndex, onSelectPlayer, p
                 selectedPlayerId === player.id
                   ? 'bg-blue-100 border-blue-500'
                   : 'hover:bg-gray-100'
-              }`}
+              }${draggedPlayer?.id === player.id ? 'opacity-50' : ''}`}
+              draggable={!(assignClicked && !isRollbackAllowed)} // 🔥🔥🔥 수정됨: 드래그 가능 여부 제어
+              onDragStart={(e) => handleDragStart(e, player)}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, player)}
+              onDragEnd={handleDragEnd}// 🔥🔥🔥 수정됨: 드래그 종료 이벤트 추가
             >
               <td className='px-4 py-2 text-center'>
                 {selectedPlayerId === player.id ? ( // 플레이어 선택 여부에 따라
