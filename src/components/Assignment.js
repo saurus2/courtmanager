@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import RandomizeButton from './RandomizeButton';
 import Court from './Court';
 import StatusTable from './StatusTable';
+import { FaUndoAlt } from 'react-icons/fa';
 
 function Assignment({ 
   numTotCourts, 
@@ -31,16 +32,11 @@ function Assignment({
   const [selectedSinglePlayer, setSelectedSinglePlayer] = useState(null); // 한 명 선택된 사람
   const [isChangeAllowed, setIsChangeAllowed] = useState(false); // 🔥 Change Players 버튼 활성화 여부
 
-
-  // function handleListPlayerSelect(player) {
-  //   if (!player) {
-  //     console.log("⚠ handleListPlayerSelect - 받은 플레이어가 없음!"); // 🔴 디버깅 추가
-  //     return;
-  //   }
-
-  //   console.log("📌 Assignment - 선택된 리스트 플레이어:", player); // 🔴 디버깅 추가
-  //   setSelectedListPlayer(player);
-  // }
+  // 🔥🔥🔥 새로 추가: 롤백을 위한 상태 저장 🔥🔥🔥
+  const [rollbackCourts, setRollbackCourts] = useState(null);
+  const [rollbackPlayingStatus, setRollbackPlayingStatus] = useState(null);
+  const [rollbackPlayers, setRollbackPlayers] = useState(null);
+  const [isRollbackAllowed, setIsRollbackAllowed] = useState(false);
 
   // saving updated courts data on localStorage
   useEffect(() => {
@@ -98,26 +94,19 @@ function Assignment({
       }
     }
   }
-  
-  // 🔴 추가: 리스트에서 선택한 플레이어를 저장하는 함수
-  // function handleListPlayerSelect(player) {
-  //   setSelectedListPlayer(player);
-  // }
 
   function onAssignPlayers(courtAssignments) {
     const updatedCourts = courts.map((court) => ({
       ...court,
       players: courtAssignments[court.courtIndex] || []
     }));
-    // 임시 코트 데이터에 저장 (화면에도 즉시 반영)
-    // setTemporaryCourts(updatedCourts);
     setCourts(updatedCourts); // 화면에 즉시 반영
-    // setTempStartIndex(currentStartIndex.current); // 임시 인덱스 저장
+    // 🔥🔥🔥 수정됨: Assign Players 직후 상태 저장 🔥🔥🔥
+    setRollbackCourts(updatedCourts); // 롤백용 코트 상태 저장
+    setRollbackPlayingStatus({ ...playingStatus }); // 롤백용 playingStatus 저장
+    setRollbackPlayers([...players]); // 롤백용 players 상태 저장
     setAssignClicked(true); // Assign players가 눌렸음을 표시
     setIsChangeAllowed(true); // Change Players 버튼 활성화
-
-    // 🔥 Assign 후 Change Players 버튼 활성화
-    setIsChangeAllowed(true);
   }
 
   function handleChangePlayers() {
@@ -297,8 +286,32 @@ function Assignment({
     // 임시 데이터 초기화
     // setTemporaryCourts([...temporaryCourts]);
     setAssignClicked(false); // Confirmation 버튼 비활성화
+    // 🔥🔥🔥 수정됨: Confirmation 후 Rollback 버튼 활성화 🔥🔥🔥
+    setIsRollbackAllowed(true);
   }
-  
+
+  // 🔥🔥🔥 새로 추가: Rollback 기능 구현 🔥🔥🔥
+  function handleRollback() {
+    if (!rollbackCourts || !rollbackPlayingStatus || !rollbackPlayers) {
+      alert("No state to rollback to!");
+      return;
+    }
+
+    // Assign Players 직후 상태로 복원
+    setCourts([...rollbackCourts]);
+    setPlayingStatus({ ...rollbackPlayingStatus });
+    setPlayers([...rollbackPlayers]);
+
+    // 로컬 스토리지 업데이트
+    localStorage.setItem("courts", JSON.stringify(rollbackCourts));
+    localStorage.setItem("playingStatus", JSON.stringify(rollbackPlayingStatus));
+    localStorage.setItem("players", JSON.stringify(rollbackPlayers));
+
+    // 상태 업데이트
+    setAssignClicked(true); // Assign 버튼 비활성화 유지
+    setIsChangeAllowed(true); // Change Players 버튼 활성화
+    setIsRollbackAllowed(false); // Rollback 버튼 비활성화
+  }
 
   return (
     <div>
@@ -318,7 +331,7 @@ function Assignment({
           </div>
         ))}
       </div>
-      <div className='mt-4'>
+      <div className='mt-4 flex items-center'>
         <RandomizeButton
           courts={courts}
           players={players}
@@ -379,6 +392,18 @@ function Assignment({
           }`}
         >
           Confirmation
+        </button>
+        {/* 🔥🔥🔥 수정됨: Rollback 버튼을 Confirmation 오른쪽에 배치 🔥🔥🔥 */}
+        <button
+          onClick={handleRollback}
+          disabled={!isRollbackAllowed}
+          className={`h-10 w-10 rounded-md ml-2 flex items-center justify-center ${
+            isRollbackAllowed
+              ? 'bg-red-500 text-white hover:bg-red-600'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          }`}
+        >
+          <FaUndoAlt className="text-lg" />
         </button>
       </div>
     </div>
