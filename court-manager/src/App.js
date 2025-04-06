@@ -222,7 +222,7 @@ function App() {
                   {/* 버튼 클릭 시 SpecialPlayers의 addSpecialPlayer 함수 호출 */}
                   <button 
                     onClick={() => specialPlayersRef.current?.addSpecialPlayer()} 
-                    className='bg-green-500 text-white px-4 py-2 rounded mr-4'
+                    className='bg-blue-500 text-white px-4 py-2 rounded mr-4'
                   >
                     Add Special
                   </button>
