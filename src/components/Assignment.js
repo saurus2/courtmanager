@@ -39,6 +39,12 @@ function Assignment({
   const [rollbackPlayers, setRollbackPlayers] = useState(null);
   const [isRollbackAllowed, setIsRollbackAllowed] = useState(false);
 
+  // 🔥 현재 라운드에서 카운트된 플레이어 추적
+  const [countedPlayers, setCountedPlayers] = useState(new Set());
+
+  // ⭐ 롤백용 인덱스 상태 추가
+  const [rollbackStartIndex, setRollbackStartIndex] = useState(null);
+
   // saving updated courts data on localStorage
   useEffect(() => {
     localStorage.setItem('courts', JSON.stringify(courts));
@@ -113,9 +119,13 @@ function Assignment({
     setRollbackCourts(updatedCourts); // 롤백용 코트 상태 저장
     setRollbackPlayingStatus({ ...playingStatus }); // 롤백용 playingStatus 저장
     setRollbackPlayers([...players]); // 롤백용 players 상태 저장
+    // ⭐ 현재 인덱스 저장
+    setRollbackStartIndex(currentStartIndex);
     setAssignClicked(true); // Assign players가 눌렸음을 표시
     setIsChangeAllowed(true); // Change Players 버튼 활성화
     setIsRollbackAllowed(false); // 🔥🔥🔥 수정됨: Assign 시 isRollbackAllowed 리셋
+    // 🔥 새 배정 시 countedPlayers 초기화
+    setCountedPlayers(new Set());
   }
 
   function handleChangePlayers() {
@@ -128,6 +138,23 @@ function Assignment({
         alert("이미 코트에 있는 사람은 교체할 수 없습니다.");
         return;
       }
+
+      // 🔥 playingStatus 및 countedPlayers 업데이트
+      // const updatedPlayingStatus = { ...playingStatus };
+      // delete updatedPlayingStatus[courtPlayer.id];
+      // updatedPlayingStatus[selectedListPlayer.id] = true;
+      // setPlayingStatus(updatedPlayingStatus);
+      // localStorage.setItem("playingStatus", JSON.stringify(updatedPlayingStatus));
+
+      // ⭐ countedPlayers에서 기존 플레이어 제거 (새 플레이어 추가 제거)
+      setCountedPlayers((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(courtPlayer.id);
+        // ⭐ 제거: newSet.add(selectedListPlayer.id);
+        console.log(`⭐ Change Players: Removed ${courtPlayer.name} (ID: ${courtPlayer.id}) from countedPlayers`);
+        console.log(`⭐ Change Players: New player ${selectedListPlayer.name} (ID: ${selectedListPlayer.id}) will be counted in Confirmation`);
+        return newSet;
+      });
 
       // ✅ 코트 업데이트: 기존 사람 제거 후 리스트의 사람 추가
       setCourts((prevCourts) =>
@@ -258,33 +285,62 @@ function Assignment({
     setPlayingStatus(updatedPlayingStatus); // 상태 업데이트
     localStorage.setItem("playingStatus", JSON.stringify(updatedPlayingStatus)); // ✅ localStorage에도 반영
 
-    // 인덱스 변경 (Confirmation 시에만)
-    if (isSpecialEnabled) {
-      currentStartIndex.current = (currentStartIndex.current + (courts.filter((court) => court.isSelected).length * 4 - specialPlayers.length)) % players.length;
-    } else {
-      currentStartIndex.current = (currentStartIndex.current + courts.filter((court) => court.isSelected).length * 4) % players.length;
-    }
+    // 🔥 인덱스 업데이트
+    const selectedCourtsCount = courts.filter((court) => court.isSelected).length;
+    const newIndex = isSpecialEnabled
+      ? (currentStartIndex + (selectedCourtsCount * 4 - specialPlayers.length)) % players.length
+      : (currentStartIndex + selectedCourtsCount * 4) % players.length;
+
+    updateStartIndex(newIndex); // 🔥 useState 업데이트
   
-    // 게임 횟수 업데이트
+    // // 게임 횟수 업데이트
+    // const updatedPlayers = players.map((player) => {
+    //   const isCurrentlyAssigned = courts.some((court) =>
+    //     court.players.some((courtPlayer) => courtPlayer.id === player.id && courtPlayer.name === player.name)
+    //   );
+    //   // "Change Players"로 이미 교체된 경우, 추가로 증가시키지 않음
+    //   if (isCurrentlyAssigned && updatedPlayingStatus[player.id]) {
+    //     // 🔥 리스트에서 코트로 들어온 플레이어는 이미 handleChangePlayers에서 +1 했으므로,
+    //     // 🔥 여기서는 추가 증가를 하지 않도록 조건 확인
+    //     const wasAlreadyCounted = player.playingCount > 0 && !savedStatus[player.id];
+    //     if (!wasAlreadyCounted) {
+    //       return {
+    //         ...player,
+    //         playingCount: Number(player.playingCount) + 1 // 🔥 현재 코트에 있는 경우만 +1
+    //       };
+    //     }
+    //   }
+    //   return player;
+    // });
+  
+    // 🔥 playingCount 업데이트
     const updatedPlayers = players.map((player) => {
       const isCurrentlyAssigned = courts.some((court) =>
-        court.players.some((courtPlayer) => courtPlayer.id === player.id && courtPlayer.name === player.name)
+        court.players.some((courtPlayer) => courtPlayer.id === player.id)
       );
-      // "Change Players"로 이미 교체된 경우, 추가로 증가시키지 않음
       if (isCurrentlyAssigned && updatedPlayingStatus[player.id]) {
-        // 🔥 리스트에서 코트로 들어온 플레이어는 이미 handleChangePlayers에서 +1 했으므로,
-        // 🔥 여기서는 추가 증가를 하지 않도록 조건 확인
-        const wasAlreadyCounted = player.playingCount > 0 && !savedStatus[player.id];
-        if (!wasAlreadyCounted) {
+        // 🔥 countedPlayers를 기준으로 중복 증가 방지
+        if (!countedPlayers.has(player.id)) {
+          console.log(`🔍 Increasing playingCount for ${player.name} (ID: ${player.id})`);
           return {
             ...player,
-            playingCount: Number(player.playingCount) + 1 // 🔥 현재 코트에 있는 경우만 +1
+            playingCount: Number(player.playingCount || 0) + 1
           };
         }
+        console.log(`🔍 Skipping playingCount for ${player.name} (ID: ${player.id}, already counted in this round)`);
       }
       return player;
     });
-  
+
+    // 🔥 countedPlayers 업데이트
+    const newCountedPlayers = new Set();
+    courts.forEach(court => {
+      court.players.forEach(player => {
+        newCountedPlayers.add(player.id);
+      });
+    });
+    setCountedPlayers(newCountedPlayers);
+
     setPlayers(updatedPlayers);
     // setCourts([...temporaryCourts]); // courts 동기화
   
@@ -311,15 +367,23 @@ function Assignment({
     setPlayingStatus({ ...rollbackPlayingStatus });
     setPlayers([...rollbackPlayers]);
 
+    // ⭐ 인덱스 복원
+    if (rollbackStartIndex !== null) {
+      updateStartIndex(rollbackStartIndex);
+      console.log(`⭐ Rollback: Restored currentStartIndex to ${rollbackStartIndex}`);
+    }
+
     // 로컬 스토리지 업데이트
     localStorage.setItem("courts", JSON.stringify(rollbackCourts));
     localStorage.setItem("playingStatus", JSON.stringify(rollbackPlayingStatus));
     localStorage.setItem("players", JSON.stringify(rollbackPlayers));
 
-    // 상태 업데이트
-    setAssignClicked(true); // Assign 버튼 비활성화 유지
+    // ⭐ Confirmation 버튼 비활성화
+    setAssignClicked(false);
     setIsChangeAllowed(true); // Change Players 버튼 활성화
     setIsRollbackAllowed(false); // Rollback 버튼 비활성화
+    // 🔥 countedPlayers 초기화
+    setCountedPlayers(new Set());
   }
 
   return (

@@ -20,6 +20,12 @@ function App() {
     return savedStatus ? JSON.parse(savedStatus) : {};
   });
 
+  // Handling index on local
+  const [currentStartIndex, setCurrentStartIndex] = useState(() => {
+    const savedIndex = localStorage.getItem('currentStartIndex');
+    return savedIndex ? parseInt(savedIndex, 10) : 0;
+  });
+
   // SpecialPlayers 컴포넌트의 ref 생성
   const specialPlayersRef = useRef(null);
 
@@ -33,13 +39,6 @@ function App() {
           players: []
         }));
   });
-
-  // saving updated currentStartIndex on localStorage
-  const currentStartIndex = useRef(
-    localStorage.getItem('currentStartIndex')
-      ? parseInt(localStorage.getItem('currentStartIndex'), 10)
-      : 0
-  );
 
   const [isLocked, setIsLocked] = useState(false); // Lock 상태 관리
 
@@ -90,10 +89,13 @@ function App() {
     localStorage.setItem("playingStatus", JSON.stringify(playingStatus));
   }, [playingStatus]);
 
+  useEffect(() => {
+    localStorage.setItem('currentStartIndex', currentStartIndex.toString());
+  }, [currentStartIndex]);
+
   // saving changed currentStartIndex on localStorage
   const updateStartIndex = (newIndex) => {
-    currentStartIndex.current = newIndex;
-    localStorage.setItem('currentStartIndex', newIndex.toString()); // saving start index
+    setCurrentStartIndex(newIndex);
   };
 
   // Lock 토글 핸들러
@@ -171,10 +173,16 @@ function App() {
             setCourts={setCourts}
           ></ImportButton>
           <div className="flex items-center mb-2 space-x-4"> {/* 수평 정렬 */}
-            {/* Total Players */}
-            <span className="text-lg font-semibold">
-              Total Players: {players.length}
-            </span>
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold text-gray-600">
+                Total Players: {players.length}
+              </span>
+              <span className="text-sm font-semibold text-gray-500 mt-1">
+                Start from: {players.length > 0 && currentStartIndex < players.length 
+                  ? `${players[currentStartIndex].id}-${players[currentStartIndex].name}`
+                  : 'None'}
+              </span>
+            </div>
             {/* Add New Player 버튼 */}
             <button
               onClick={openModal}
