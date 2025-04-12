@@ -62,16 +62,42 @@ function RandomizeButton({
     // ✅ Special List 플레이어가 먼저 배정됨
     currentBatch = [...assignedPlayers];
 
-    // ✅ 기존 방식 유지: currentStartIndex를 활용하여 남은 슬롯 채우기
+    // 🔥 currentStartIndex 검증
+    const safeIndex = Math.max(0, Math.min(currentStartIndex, players.length - 1));
+
+    // // ✅ 기존 방식 유지: currentStartIndex를 활용하여 남은 슬롯 채우기
+    // if (currentBatch.length < batchSize) {
+    //   if (currentStartIndex + (batchSize - currentBatch.length) > totalPlayers) {
+    //     const endSlice = playersToAssign.slice(currentStartIndex);
+    //     const startSlice = playersToAssign.slice(0, (batchSize - currentBatch.length) - endSlice.length);
+    //     currentBatch = [...currentBatch, ...endSlice, ...startSlice];
+    //   } else {
+    //     currentBatch = [...currentBatch, ...playersToAssign.slice(currentStartIndex, currentStartIndex + batchSize - currentBatch.length)];
+    //   }
+    // }
+
+    // 🔥 플레이어 선택
     if (currentBatch.length < batchSize) {
-      if (currentStartIndex.current + (batchSize - currentBatch.length) > totalPlayers) {
-        const endSlice = playersToAssign.slice(currentStartIndex.current);
-        const startSlice = playersToAssign.slice(0, (batchSize - currentBatch.length) - endSlice.length);
+      if (safeIndex + (batchSize - currentBatch.length) > totalPlayers) {
+        const endSlice = playersToAssign.slice(safeIndex);
+        const remainingSlots = batchSize - currentBatch.length - endSlice.length;
+        const startSlice = playersToAssign.slice(0, remainingSlots);
         currentBatch = [...currentBatch, ...endSlice, ...startSlice];
       } else {
-        currentBatch = [...currentBatch, ...playersToAssign.slice(currentStartIndex.current, currentStartIndex.current + batchSize - currentBatch.length)];
+        currentBatch = [...currentBatch, ...playersToAssign.slice(safeIndex, safeIndex + batchSize - currentBatch.length)];
       }
     }
+
+    // 🔥 중복 플레이어 제거
+    const uniqueBatch = [];
+    const seenIds = new Set();
+    currentBatch.forEach(player => {
+      if (!seenIds.has(player.id)) {
+        seenIds.add(player.id);
+        uniqueBatch.push(player);
+      }
+    });
+    currentBatch = uniqueBatch;
 
     // 현재 배치할 그룹을 랜덤으로 섞기
     currentBatch = currentBatch.sort(() => Math.random() - 0.5);
