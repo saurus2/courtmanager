@@ -239,6 +239,7 @@ function App() {
             assignClicked={assignStatus.assignClicked} // 🔥🔥🔥 새로 추가: assignClicked 전달
             isRollbackAllowed={assignStatus.isRollbackAllowed} // 🔥🔥🔥 새로 추가: isRollbackAllowed 전달
             setCurrentStartIndex={setCurrentStartIndex} // 🔥🔥🔥 새로 추가: setCurrentStartIndex 전달
+            courts={courts} // ⭐ 추가
           />
         </div>
         <div className='w-2/3 p-4'>

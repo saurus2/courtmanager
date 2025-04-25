@@ -10,7 +10,8 @@ function StatusTable({
   playingStatus,
   assignClicked, // 🔥🔥🔥 새로 추가: Assign 상태
   isRollbackAllowed, // 🔥🔥🔥 새로 추가: Rollback 상태
-  setCurrentStartIndex
+  setCurrentStartIndex,
+  courts // ⭐ 추가
 }) {
   // The information for view
   const [isModalOpen, setIsModalOpen] = useState(false); // 모달 창 상태
@@ -95,7 +96,16 @@ function StatusTable({
       alert('No player selected!');
       return;
     }
+    // ⭐ 추가: 선택된 플레이어가 코트에 배정되어 있는지 확인
+    const isPlayerAssigned = courts.some(court =>
+      court.players.some(player => player.id === selectedPlayerId)
+    );
 
+    if (isPlayerAssigned) {
+      alert('Cannot delete a player currently assigned to a court.');
+      return;
+    }
+    
     const updatedPlayers = players.filter(
       (player) => player.id !== selectedPlayerId
     );
