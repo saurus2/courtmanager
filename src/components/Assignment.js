@@ -20,7 +20,8 @@ function Assignment({
   setSelectedListPlayer, // 🔥 초기화 위해 전달받음
   playingStatus, // 🔥 테니스공 아이콘 상태
   setPlayingStatus, // 🔥 상태 변경 함수
-  onAssignStatusChange // 🔥🔥🔥 새로 추가: 상태 전달용 callback
+  onAssignStatusChange, // 🔥🔥🔥 새로 추가: 상태 전달용 callback
+  setIsAssignmentCompleted // ⭐ 추가
 }) {
   const [selectedPlayers, setSelectedPlayers] = useState([]);
   // const [temporaryCourts, setTemporaryCourts] = useState([]); // 임시 코트 데이터
@@ -285,11 +286,20 @@ function Assignment({
     setPlayingStatus(updatedPlayingStatus); // 상태 업데이트
     localStorage.setItem("playingStatus", JSON.stringify(updatedPlayingStatus)); // ✅ localStorage에도 반영
 
-    // 🔥 인덱스 업데이트
+    // ⭐ 인덱스 업데이트
     const selectedCourtsCount = courts.filter((court) => court.isSelected).length;
-    const newIndex = isSpecialEnabled
-      ? (currentStartIndex + (selectedCourtsCount * 4 - specialPlayers.length)) % players.length
-      : (currentStartIndex + selectedCourtsCount * 4) % players.length;
+    const playersPerRound = selectedCourtsCount * 4;
+    let newIndex;
+    if (isSpecialEnabled) {
+      newIndex = (currentStartIndex + (playersPerRound - specialPlayers.length)) % players.length;
+    } else {
+      newIndex = (currentStartIndex + playersPerRound) % players.length;
+    }
+    // ⭐ 수정: 모든 플레이어가 배정된 경우 newIndex를 0으로 설정하고 isAssignmentCompleted를 true로 설정
+    if (currentStartIndex + playersPerRound >= players.length) {
+      newIndex = 0;
+      setIsAssignmentCompleted(true); // ⭐ 추가
+    }
 
     updateStartIndex(newIndex); // 🔥 useState 업데이트
   
