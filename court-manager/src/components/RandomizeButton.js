@@ -62,9 +62,10 @@ function RandomizeButton({
     // ✅ Special List 플레이어가 먼저 배정됨
     currentBatch = [...assignedPlayers];
 
-    // 🔥 currentStartIndex 검증
-    const safeIndex = Math.max(0, Math.min(currentStartIndex, players.length - 1));
-
+    // ⭐ 수정: currentStartIndex 검증
+    const safeIndex = currentStartIndex >= 0 && currentStartIndex < players.length 
+      ? currentStartIndex 
+      : 0;
     // // ✅ 기존 방식 유지: currentStartIndex를 활용하여 남은 슬롯 채우기
     // if (currentBatch.length < batchSize) {
     //   if (currentStartIndex + (batchSize - currentBatch.length) > totalPlayers) {

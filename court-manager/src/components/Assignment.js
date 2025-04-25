@@ -21,7 +21,10 @@ function Assignment({
   playingStatus, // 🔥 테니스공 아이콘 상태
   setPlayingStatus, // 🔥 상태 변경 함수
   onAssignStatusChange, // 🔥🔥🔥 새로 추가: 상태 전달용 callback
-  setIsAssignmentCompleted // ⭐ 추가
+  setIsAssignmentCompleted, // ⭐ 추가
+  isAssignmentCompleted, // ⭐ 추가
+  hasSetNewStartIndex, // ⭐ 추가
+  setHasSetNewStartIndex // ⭐ 추가
 }) {
   const [selectedPlayers, setSelectedPlayers] = useState([]);
   // const [temporaryCourts, setTemporaryCourts] = useState([]); // 임시 코트 데이터
@@ -286,25 +289,28 @@ function Assignment({
     setPlayingStatus(updatedPlayingStatus); // 상태 업데이트
     localStorage.setItem("playingStatus", JSON.stringify(updatedPlayingStatus)); // ✅ localStorage에도 반영
 
-    // ⭐ 인덱스 업데이트
+     // ⭐ 인덱스 업데이트
     const selectedCourtsCount = courts.filter((court) => court.isSelected).length;
     const playersPerRound = selectedCourtsCount * 4;
-    let newIndex;
+    let newIndex = currentStartIndex;
     if (isSpecialEnabled) {
       newIndex = (currentStartIndex + (playersPerRound - specialPlayers.length)) % players.length;
     } else {
       newIndex = (currentStartIndex + playersPerRound) % players.length;
     }
-    // ⭐ 수정: 모든 플레이어가 배정된 경우와 아닌 경우를 구분
-    const totalAssigned = currentStartIndex + playersPerRound;
-    if (totalAssigned >= players.length) {
-      // 모든 플레이어가 배정된 경우, 남은 플레이어 수 계산
-      const remainingPlayers = totalAssigned % players.length;
-      newIndex = remainingPlayers === 0 ? 0 : remainingPlayers;
-      setIsAssignmentCompleted(true); // 배정 완료 상태 설정
+    // ⭐ 수정: 새 플레이어 배정 후 다음 플레이어로 이동
+    if (isAssignmentCompleted && hasSetNewStartIndex && currentStartIndex >= players.length - playersPerRound) {
+      // 새 플레이어 배정 완료 후, 다음 원래 플레이어로 이동
+      newIndex = playersPerRound - (players.length - currentStartIndex);
+      setHasSetNewStartIndex(false); // 새 플레이어 배정 완료, 플래그 리셋
+      setIsAssignmentCompleted(false); // 배정 미완료 상태로 전환
+    } else if (currentStartIndex + playersPerRound >= players.length) {
+      // 모든 원래 플레이어가 배정된 경우, 0으로 리셋
+      newIndex = 0;
+      setIsAssignmentCompleted(true);
     } else {
-      // 아직 배정이 완료되지 않은 경우, 다음 인덱스로 진행
-      setIsAssignmentCompleted(false); // 배정 미완료 상태 유지
+      // 일반 배정 진행
+      setIsAssignmentCompleted(false);
     }
 
     updateStartIndex(newIndex); // 🔥 useState 업데이트
