@@ -295,10 +295,16 @@ function Assignment({
     } else {
       newIndex = (currentStartIndex + playersPerRound) % players.length;
     }
-    // ⭐ 수정: 모든 플레이어가 배정된 경우 newIndex를 0으로 설정하고 isAssignmentCompleted를 true로 설정
-    if (currentStartIndex + playersPerRound >= players.length) {
-      newIndex = 0;
-      setIsAssignmentCompleted(true); // ⭐ 추가
+    // ⭐ 수정: 모든 플레이어가 배정된 경우와 아닌 경우를 구분
+    const totalAssigned = currentStartIndex + playersPerRound;
+    if (totalAssigned >= players.length) {
+      // 모든 플레이어가 배정된 경우, 남은 플레이어 수 계산
+      const remainingPlayers = totalAssigned % players.length;
+      newIndex = remainingPlayers === 0 ? 0 : remainingPlayers;
+      setIsAssignmentCompleted(true); // 배정 완료 상태 설정
+    } else {
+      // 아직 배정이 완료되지 않은 경우, 다음 인덱스로 진행
+      setIsAssignmentCompleted(false); // 배정 미완료 상태 유지
     }
 
     updateStartIndex(newIndex); // 🔥 useState 업데이트
