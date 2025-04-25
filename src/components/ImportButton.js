@@ -74,9 +74,9 @@ const ImportButton = ({
             ...sortedPlayers
           ]);
           localStorage.setItem('players', JSON.stringify(updatedPlayers)); // LocalStorage에 저장
-          // ⭐ 수정: isAssignmentCompleted가 true이고 currentStartIndex가 0일 때만 새 플레이어로 설정
-          if (isAssignmentCompleted && currentStartIndex === 0 && prevPlayers.length > 0) {
-            setCurrentStartIndex(updatedPlayers.length - 1);
+          // ⭐ 수정: isAssignmentCompleted가 true이고 currentStartIndex가 기존 리스트 범위 내일 때만 첫 번째 새 플레이어로 설정
+          if (isAssignmentCompleted && currentStartIndex < prevPlayers.length && prevPlayers.length > 0) {
+            setCurrentStartIndex(prevPlayers.length);
           }
           return updatedPlayers;
         });

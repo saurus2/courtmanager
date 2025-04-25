@@ -9,7 +9,8 @@ function StatusTable({
   onSelectPlayer, 
   playingStatus,
   assignClicked, // 🔥🔥🔥 새로 추가: Assign 상태
-  isRollbackAllowed // 🔥🔥🔥 새로 추가: Rollback 상태
+  isRollbackAllowed, // 🔥🔥🔥 새로 추가: Rollback 상태
+  setCurrentStartIndex
 }) {
   // The information for view
   const [isModalOpen, setIsModalOpen] = useState(false); // 모달 창 상태
@@ -99,12 +100,14 @@ function StatusTable({
       (player) => player.id !== selectedPlayerId
     );
 
-    // Adjusting the index for randomizing
-    if (
-      players.findIndex((player) => player.id === selectedPlayerId) <
-      currentStartIndex.current
-    ) {
-      currentStartIndex.current = Math.max(0, currentStartIndex.current - 1); // Decreasing the index of removed player
+    // ⭐ 수정: currentStartIndex 조정
+    const deletedPlayerIndex = players.findIndex((player) => player.id === selectedPlayerId);
+    if (deletedPlayerIndex < currentStartIndex) {
+      // 삭제된 플레이어가 currentStartIndex보다 앞에 있으면 인덱스 감소
+      setCurrentStartIndex(Math.max(0, currentStartIndex - 1));
+    } else if (currentStartIndex >= updatedPlayers.length) {
+      // currentStartIndex가 새 리스트 길이를 초과하면 0으로 리셋
+      setCurrentStartIndex(0);
     }
 
     setPlayers(updatedPlayers);
