@@ -36,6 +36,34 @@ function App() {
     return localStorage.getItem('hasSetNewStartIndex') === 'true';
   });
 
+  // ⭐ 수정: 상태 추가 (약 28번째 줄 근처, hasSetNewStartIndex 아래)
+  const [isSetStartModalOpen, setIsSetStartModalOpen] = useState(false);
+  const [inputId, setInputId] = useState('');
+
+  // ⭐ 추가: 모달 핸들러 함수 (약 100번째 줄 근처, addPlayer 아래)
+  const openSetStartModal = () => setIsSetStartModalOpen(true);
+
+  const closeSetStartModal = () => {
+    setIsSetStartModalOpen(false);
+    setInputId('');
+  };
+
+  const confirmSetStart = () => {
+    if (!inputId.trim()) {
+      alert('ID cannot be empty!');
+      return;
+    }
+  
+    const playerIndex = players.findIndex(player => player.id === inputId.trim());
+    if (playerIndex === -1) {
+      alert('Invalid ID. Please enter an existing player ID.');
+      return;
+    }
+  
+    setCurrentStartIndex(playerIndex);
+    closeSetStartModal();
+  };
+
   // SpecialPlayers 컴포넌트의 ref 생성
   const specialPlayersRef = useRef(null);
 
@@ -217,7 +245,7 @@ function App() {
                 Total Players: {players.length}
               </span>
               <span className="text-sm font-semibold text-gray-500 mt-1">
-                Start from: {players.length > 0 && currentStartIndex >= 0 && currentStartIndex < players.length
+                Start: {players.length > 0 && currentStartIndex >= 0 && currentStartIndex < players.length
                   ? `${players[currentStartIndex].id}-${players[currentStartIndex].name}`
                   : 'None'}
               </span>
@@ -229,17 +257,25 @@ function App() {
             >
               Add New Player
             </button>
+            <button
+              onClick={openSetStartModal}
+              className="px-2 py-1 bg-orange-500 hover:bg-orange-600 text-white text-xs font-medium rounded-md shadow-md transition-all duration-200"
+            >
+              Set Start
+            </button>
           </div>
           <StatusTable
             players={players}
             setPlayers={setPlayers}
             currentStartIndex={currentStartIndex}
-            onSelectPlayer={setSelectedListPlayer} // 🔥 리스트에서 선택한 플레이어 상태 업데이트
-            playingStatus={playingStatus} // 🔥 상태 전달
-            assignClicked={assignStatus.assignClicked} // 🔥🔥🔥 새로 추가: assignClicked 전달
-            isRollbackAllowed={assignStatus.isRollbackAllowed} // 🔥🔥🔥 새로 추가: isRollbackAllowed 전달
-            setCurrentStartIndex={setCurrentStartIndex} // 🔥🔥🔥 새로 추가: setCurrentStartIndex 전달
-            courts={courts} // ⭐ 추가
+            setCurrentStartIndex={setCurrentStartIndex}
+            onSelectPlayer={setSelectedListPlayer}
+            playingStatus={playingStatus}
+            setPlayingStatus={setPlayingStatus} // ⭐ 추가
+            assignClicked={assignStatus.assignClicked}
+            isRollbackAllowed={assignStatus.isRollbackAllowed}
+            courts={courts}
+            setCourts={setCourts} // ⭐ 추가
           />
         </div>
         <div className='w-2/3 p-4'>
@@ -347,6 +383,50 @@ function App() {
                 className='px-4 py-2 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400 transition-all duration-200'
               >
                 Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {isSetStartModalOpen && (
+        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
+          <div className='bg-white p-6 rounded-lg shadow-lg w-1/3'>
+            <div className='flex justify-between items-center mb-4'>
+              <h2 className='text-lg font-bold'>Set Start Player</h2>
+              <button
+                onClick={closeSetStartModal}
+                className='text-gray-500 hover:text-gray-800 transition-all duration-200'
+              >
+                &times;
+              </button>
+            </div>
+            <div className='mb-4'>
+              <label
+                htmlFor='playerId'
+                className='block text-sm font-medium text-gray-700 mb-2'
+              >
+                Player ID
+              </label>
+              <input
+                id='playerId'
+                type='text'
+                value={inputId}
+                onChange={(e) => setInputId(e.target.value)}
+                className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+              />
+            </div>
+            <div className='flex justify-end space-x-4'>
+              <button
+                onClick={closeSetStartModal}
+                className='px-4 py-2 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400 transition-all duration-200'
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmSetStart}
+                className='px-4 py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition-all duration-200'
+              >
+                Confirm
               </button>
             </div>
           </div>

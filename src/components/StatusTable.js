@@ -6,12 +6,14 @@ function StatusTable({
   players, 
   setPlayers, 
   currentStartIndex, 
+  setCurrentStartIndex, 
   onSelectPlayer, 
   playingStatus,
-  assignClicked, // 🔥🔥🔥 새로 추가: Assign 상태
-  isRollbackAllowed, // 🔥🔥🔥 새로 추가: Rollback 상태
-  setCurrentStartIndex,
-  courts // ⭐ 추가
+  setPlayingStatus, // ⭐ 추가
+  assignClicked,
+  isRollbackAllowed,
+  courts,
+  setCourts // ⭐ 추가
 }) {
   // The information for view
   const [isModalOpen, setIsModalOpen] = useState(false); // 모달 창 상태
@@ -105,10 +107,34 @@ function StatusTable({
       alert('Cannot delete a player currently assigned to a court.');
       return;
     }
-    
+
     const updatedPlayers = players.filter(
       (player) => player.id !== selectedPlayerId
     );
+
+    // ⭐ 추가: 남은 플레이어의 ID를 1부터 순차적으로 재할당
+    const reindexedPlayers = updatedPlayers.map((player, index) => ({
+      ...player,
+      id: (index + 1).toString()
+    }));
+
+    // ⭐ 추가: courts의 플레이어 ID 업데이트
+    const updatedCourts = courts.map(court => ({
+      ...court,
+      players: court.players.map(player => {
+        const newPlayer = reindexedPlayers.find(p => p.name === player.name && p.checkInDate === player.checkInDate);
+        return newPlayer ? { ...player, id: newPlayer.id } : player;
+      })
+    }));
+
+    // ⭐ 추가: playingStatus의 키를 새로운 ID로 매핑
+    const updatedPlayingStatus = {};
+    Object.keys(playingStatus).forEach(oldId => {
+      const player = reindexedPlayers.find(p => p.id === (parseInt(oldId) <= parseInt(selectedPlayerId) ? oldId : (parseInt(oldId) - 1).toString()));
+      if (player) {
+        updatedPlayingStatus[player.id] = playingStatus[oldId];
+      }
+    });
 
     // ⭐ 수정: currentStartIndex 조정
     const deletedPlayerIndex = players.findIndex((player) => player.id === selectedPlayerId);
@@ -120,7 +146,13 @@ function StatusTable({
       setCurrentStartIndex(0);
     }
 
-    setPlayers(updatedPlayers);
+    // 상태 업데이트
+    setPlayers(reindexedPlayers);
+    setCourts(updatedCourts);
+    setPlayingStatus(updatedPlayingStatus);
+    localStorage.setItem('players', JSON.stringify(reindexedPlayers));
+    localStorage.setItem('courts', JSON.stringify(updatedCourts));
+    localStorage.setItem('playingStatus', JSON.stringify(updatedPlayingStatus));
     setSelectedPlayerId(null);
   };
 
