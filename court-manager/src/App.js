@@ -26,6 +26,11 @@ function App() {
     return savedIndex ? parseInt(savedIndex, 10) : 0;
   });
 
+  // ⭐ 수정: 상태 추가 (약 28번째 줄 근처, courts 상태 아래)
+  const [isAssignmentCompleted, setIsAssignmentCompleted] = useState(() => {
+    return localStorage.getItem('isAssignmentCompleted') === 'true';
+  });
+
   // SpecialPlayers 컴포넌트의 ref 생성
   const specialPlayersRef = useRef(null);
 
@@ -57,6 +62,11 @@ function App() {
     assignClicked: false,
     isRollbackAllowed: false
   });
+
+  // ⭐ 추가: isAssignmentCompleted 로컬 스토리지 저장 (약 66번째 줄 근처, useEffect 블록 안)
+  useEffect(() => {
+    localStorage.setItem('isAssignmentCompleted', isAssignmentCompleted.toString());
+  }, [isAssignmentCompleted]);
 
   // Special List 상태 로컬 스토리지 저장
   useEffect(() => {
@@ -132,7 +142,14 @@ function App() {
       playingCount: 0
     };
 
-    setPlayers((prevPlayers) => [...prevPlayers, newPlayer]);
+    setPlayers((prevPlayers) => {
+      const updatedPlayers = [...prevPlayers, newPlayer];
+      // ⭐ 수정: isAssignmentCompleted가 true이고 currentStartIndex가 0일 때만 새 플레이어로 설정
+      if (isAssignmentCompleted && currentStartIndex === 0 && prevPlayers.length > 0) {
+        setCurrentStartIndex(updatedPlayers.length - 1);
+      }
+      return updatedPlayers;
+    });
     closeModal();
   };
 
@@ -171,6 +188,10 @@ function App() {
             shouldShowTestButton={false}
             setPlayers={setPlayers}
             setCourts={setCourts}
+            currentStartIndex={currentStartIndex} // ⭐ 추가
+            setCurrentStartIndex={setCurrentStartIndex} // ⭐ 추가
+            isAssignmentCompleted={isAssignmentCompleted} // ⭐ 추가
+            setIsAssignmentCompleted={setIsAssignmentCompleted} // ⭐ 추가
           ></ImportButton>
           <div className="flex items-center mb-2 space-x-4"> {/* 수평 정렬 */}
             <div className="flex flex-col">
@@ -178,7 +199,7 @@ function App() {
                 Total Players: {players.length}
               </span>
               <span className="text-sm font-semibold text-gray-500 mt-1">
-                Start from: {players.length > 0 && currentStartIndex < players.length 
+                Start from: {players.length > 0
                   ? `${players[currentStartIndex].id}-${players[currentStartIndex].name}`
                   : 'None'}
               </span>
@@ -220,6 +241,7 @@ function App() {
             setPlayingStatus={setPlayingStatus} // 🔥 상태 변경 함수 전달
             onSelectPlayer={setSelectedListPlayer}
             onAssignStatusChange={setAssignStatus} // 🔥🔥🔥 새로 추가: 상태 변경 callback 전달
+            setIsAssignmentCompleted={setIsAssignmentCompleted} // ⭐ 추가
           ></Assignment>
             {/* Special Players 리스트를 코트와 Assign 버튼 아래 배치 */}
             <div className="mt-4">

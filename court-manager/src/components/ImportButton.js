@@ -2,7 +2,15 @@ import * as XLSX from 'xlsx';
 import React from 'react';
 import moment from 'moment-timezone';
 
-const ImportButton = ({ shouldShowTestButton, setPlayers, setCourts }) => {
+const ImportButton = ({ 
+  shouldShowTestButton, 
+  setPlayers, 
+  setCourts, 
+  currentStartIndex, 
+  setCurrentStartIndex, 
+  isAssignmentCompleted, 
+  setIsAssignmentCompleted 
+}) => {
   // ID 생성 함수: 모든 플레이어 리스트에서 ID를 오름차순으로 생성
   function assignSequentialIds(players) {
     return players.map((player, index) => ({
@@ -66,6 +74,10 @@ const ImportButton = ({ shouldShowTestButton, setPlayers, setCourts }) => {
             ...sortedPlayers
           ]);
           localStorage.setItem('players', JSON.stringify(updatedPlayers)); // LocalStorage에 저장
+          // ⭐ 수정: isAssignmentCompleted가 true이고 currentStartIndex가 0일 때만 새 플레이어로 설정
+          if (isAssignmentCompleted && currentStartIndex === 0 && prevPlayers.length > 0) {
+            setCurrentStartIndex(updatedPlayers.length - 1);
+          }
           return updatedPlayers;
         });
       };
