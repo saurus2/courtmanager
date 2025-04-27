@@ -303,13 +303,22 @@ function Assignment({
       // 새 플레이어 배정 완료 후, 다음 원래 플레이어로 이동
       const totalAssigned = currentStartIndex + playersPerRound;
       if (totalAssigned >= players.length) {
-        newIndex = totalAssigned % players.length;
+        // newIndex = totalAssigned % players.length;
+        if (isSpecialEnabled) {
+          newIndex = (currentStartIndex + (playersPerRound - specialPlayers.length)) % players.length;
+        } else {
+          newIndex = totalAssigned % players.length;
+        }
         setHasSetNewStartIndex(false); // 새 플레이어 배정 완료, 플래그 리셋
         setIsAssignmentCompleted(false); // 배정 미완료 상태로 전환
       }
     } else if (currentStartIndex + playersPerRound >= players.length) {
       // 모든 원래 플레이어가 배정된 경우, 남은 플레이어로 이동
-      newIndex = (currentStartIndex + playersPerRound) % players.length;
+      if (isSpecialEnabled) {
+        newIndex = (currentStartIndex + (playersPerRound - specialPlayers.length)) % players.length;
+      } else {
+        newIndex = (currentStartIndex + playersPerRound) % players.length;
+      }
       setIsAssignmentCompleted(true);
     } else {
       // 일반 배정 진행
