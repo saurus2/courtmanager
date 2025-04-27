@@ -96,6 +96,18 @@ function App() {
     isRollbackAllowed: false
   });
 
+  // 최대 플레이어 ID 계산 (일반 플레이어 + Special List)
+  const maxPlayerId = Math.max(
+    players.reduce((max, player) => {
+      const idNum = parseInt(player.id, 10);
+      return idNum > max ? idNum : max;
+    }, 0),
+    specialPlayers.reduce((max, player) => {
+      const idNum = parseInt(player.id, 10);
+      return idNum > max ? idNum : max;
+    }, 0)
+  );
+
   // ⭐ 추가: hasSetNewStartIndex 로컬 스토리지 저장 (약 66번째 줄 근처, useEffect 블록 안)
   useEffect(() => {
     localStorage.setItem('hasSetNewStartIndex', hasSetNewStartIndex.toString());
@@ -174,10 +186,17 @@ function App() {
       return;
     }
 
-    const maxId = players.reduce((max, player) => {
-      const idNum = parseInt(player.id, 10);
-      return idNum > max ? idNum : max;
-    }, 0);
+    // 일반 플레이어와 Special List의 최대 ID를 기준으로 새 ID 설정
+    const maxId = Math.max(
+      players.reduce((max, player) => {
+        const idNum = parseInt(player.id, 10);
+        return idNum > max ? idNum : max;
+      }, 0),
+      specialPlayers.reduce((max, player) => {
+        const idNum = parseInt(player.id, 10);
+        return idNum > max ? idNum : max;
+      }, 0)
+    );
 
     const newPlayer = {
       id: (maxId + 1).toString(),
@@ -276,6 +295,8 @@ function App() {
             isRollbackAllowed={assignStatus.isRollbackAllowed}
             courts={courts}
             setCourts={setCourts} // ⭐ 추가
+            specialPlayers={specialPlayers} // ⭐ 추가: Special List 전달
+            setSpecialPlayers={setSpecialPlayers} // ⭐ 추가: Special List 상태 업데이트 함수 전달
           />
         </div>
         <div className='w-2/3 p-4'>
@@ -339,6 +360,7 @@ function App() {
                 setSpecialPlayers={setSpecialPlayers} 
                 isSpecialEnabled={isSpecialEnabled} 
                 setIsSpecialEnabled={setIsSpecialEnabled} 
+                maxPlayerId={maxPlayerId} // ⭐ 추가: 최대 플레이어 ID 전달
               />
             </div>
         </div>

@@ -1,6 +1,12 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 
-const SpecialPlayers = forwardRef(({ specialPlayers, setSpecialPlayers, isSpecialEnabled, setIsSpecialEnabled }, ref) => {
+const SpecialPlayers = forwardRef(({ 
+  specialPlayers, 
+  setSpecialPlayers, 
+  isSpecialEnabled, 
+  setIsSpecialEnabled,
+  maxPlayerId
+}, ref) => {
     const [isLoading, setIsLoading] = useState(true);
   
     // ✅ 초기 로딩 시 1회만 실행되도록 수정
@@ -26,15 +32,15 @@ const SpecialPlayers = forwardRef(({ specialPlayers, setSpecialPlayers, isSpecia
     const playerName = prompt('Enter player name:');
     if (!playerName || playerName.trim() === '') return;
 
-    const maxId = specialPlayers.reduce((max, player) => {
-      const idNum = parseInt(player.id, 10);
-      return idNum > max ? idNum : max;
-    }, 0);
+    const maxSpecialId = specialPlayers.reduce((max, player) => {
+        const idNum = parseInt(player.id, 10);
+        return idNum > max ? idNum : max;
+    }, maxPlayerId); // 일반 플레이어의 최대 ID부터 시작
 
     const newPlayer = {
-      id: (maxId + 1).toString(),
-      name: playerName.trim(),
-      playingCount: 0
+        id: (maxSpecialId + 1).toString(),
+        name: playerName.trim(),
+        playingCount: 0
     };
 
     setSpecialPlayers([...specialPlayers, newPlayer]);
