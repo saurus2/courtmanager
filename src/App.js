@@ -209,7 +209,7 @@ function App() {
     setPlayers((prevPlayers) => {
       const updatedPlayers = [...prevPlayers, newPlayer];
       // ⭐ 수정: isAssignmentCompleted가 true이고 hasSetNewStartIndex가 false일 때만 새 플레이어로 설정
-      if (isAssignmentCompleted && !hasSetNewStartIndex && prevPlayers.length > 0) {
+      if (isAssignmentCompleted && !hasSetNewStartIndex && prevPlayers.length > 0 && currentStartIndex == 0) {
         setCurrentStartIndex(prevPlayers.length);
         setHasSetNewStartIndex(true);
       }
