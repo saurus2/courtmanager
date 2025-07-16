@@ -237,14 +237,16 @@ function StatusTable({
           </tr>
         </thead>
         <tbody>
-          {players.map((player) => (
+          {players.map((player, index) => (
             <tr
               key={player.id}
               onClick={(e) => handlePlayerClick(player.id, e)}
               className={`cursor-pointer h-12 ${
                 selectedPlayerId === player.id
                   ? 'bg-blue-100 border-blue-500'
-                  : 'hover:bg-gray-100'
+                  : index % 2 === 0
+                  ? 'bg-white hover:bg-blue-200'
+                  : 'bg-gray-100 hover:bg-blue-200'
               }${draggedPlayer?.id === player.id ? 'opacity-50' : ''}`}
               draggable={!(assignClicked && !isRollbackAllowed)} // 🔥🔥🔥 수정됨: 드래그 가능 여부 제어
               onDragStart={(e) => handleDragStart(e, player)}
@@ -268,11 +270,13 @@ function StatusTable({
                 )}
               </td>
               {/* 🔥 수정됨: 이름 옆에 테니스공 아이콘 추가 */}
-              <td className='px-4 py-2 flex items-center justify-between'>
-                <span className='leading-none align-middle translate-y-1.5'>{player.name}</span>
-                {playingStatus[player.id] && (
-                  <MdSportsTennis className="text-green-500 w-5 h-5 translate-y-1.5" />
-                )}
+              <td className="px-4 py-2">
+                <div className="flex items-center justify-between h-full">
+                  <span className="text-sm">{player.name}</span>
+                  {playingStatus[player.id] && (
+                    <MdSportsTennis className="text-green-500 w-5 h-5" />
+                  )}
+                </div>
               </td>
               <td
                 className={`px-4 py-2 ${
