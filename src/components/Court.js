@@ -14,6 +14,12 @@ export default function Court({
       className={`flex flex-col rounded-lg px-3 py-6 items-center justify-start cursor-pointer
         ${isSelected ? 'bg-blue-600 hover:bg-indigo-600' : 'bg-blue-400 hover:bg-indigo-400'}
         hover:bg-blue-600 text-white transition-all duration-200`}
+        style={{ 
+          minWidth: '180px', 
+          maxWidth: '200px',
+          minHeight: '260px', 
+          maxHeight: '260px'
+        }}
     >
       {/* 상단 Court 타이틀 */}
       <div className='font-bold text-2xl mb-1'>Court {courtIndex + 1}</div>

@@ -5,6 +5,7 @@ import StatusTable from './components/StatusTable';
 import Assignment from './components/Assignment';
 import HowToUseButton from './components/HowToUseButton';
 import SpecialPlayers from './components/SpecialPlayers';
+import { FaFileImport, FaUndoAlt, FaUserPlus, FaPlay } from 'react-icons/fa';
 
 
 function App() {
@@ -259,6 +260,21 @@ function App() {
             setIsAssignmentCompleted={setIsAssignmentCompleted} // ⭐ 추가
           ></ImportButton>
           <div className="flex items-center mb-2 space-x-4"> {/* 수평 정렬 */}
+            {/* Add New Player 버튼 */}
+            <button
+              onClick={openModal}
+              className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg shadow-md transition-all duration-200"
+            >
+              <FaUserPlus /> Add
+            </button>
+            <button
+              onClick={openSetStartModal}
+              className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-lg shadow-md transition-all duration-200"
+            >
+              <FaPlay /> Start Set
+            </button>
+          </div>
+          <div className="mb-2"> {/* 수평 정렬 */}
             <div className="flex flex-col">
               <span className="text-sm font-semibold text-gray-600">
                 Total Players: {players.length}
@@ -269,19 +285,6 @@ function App() {
                   : 'None'}
               </span>
             </div>
-            {/* Add New Player 버튼 */}
-            <button
-              onClick={openModal}
-              className="px-3 py-1 flex items-center justify-center bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-md shadow-md transition-all duration-200"
-            >
-              Add New Player
-            </button>
-            <button
-              onClick={openSetStartModal}
-              className="px-2 py-1 bg-orange-500 hover:bg-orange-600 text-white text-xs font-medium rounded-md shadow-md transition-all duration-200"
-            >
-              Set Start
-            </button>
           </div>
           <StatusTable
             players={players}
@@ -347,7 +350,7 @@ function App() {
                       <div className={`w-5 h-5 bg-gray-600 rounded-full absolute top-0.5 transition-transform duration-300 ${isSpecialEnabled ? 'translate-x-6' : 'translate-x-1'}`}></div>
                     </div>
                     <span className='ml-2 text-sm font-semibold text-gray-600'>
-                      {isSpecialEnabled ? 'On' : 'Off'}
+                      {isSpecialEnabled ? 'Playing' : 'Not Playing'}
                     </span>
                   </label>
                 </div>
