@@ -422,7 +422,7 @@ function Assignment({
 
   return (
     <div>
-      <div className='grid grid-cols-[repeat(auto-fit,_minmax(150px,_1fr))] gap-2'>
+      <div className='grid grid-cols-[repeat(auto-fit,_minmax(170px,_1fr))] gap-2'>
         {courts.map((court, i) => (
           <div key={i}>
             <Court
@@ -504,13 +504,13 @@ function Assignment({
         <button
           onClick={handleRollback}
           disabled={!isRollbackAllowed}
-          className={`h-10 w-10 rounded-md ml-2 flex items-center justify-center ${
+          className={`px-4 py-2 rounded-md ml-2 flex items-center justify-center ${
             isRollbackAllowed
               ? 'bg-red-500 text-white hover:bg-red-600'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
         >
-          <FaUndoAlt className="text-lg" />
+          <FaUndoAlt className="text-lg mr-2" />Back
         </button>
       </div>
     </div>

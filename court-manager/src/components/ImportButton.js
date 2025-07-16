@@ -1,6 +1,8 @@
 import * as XLSX from 'xlsx';
 import React from 'react';
 import moment from 'moment-timezone';
+import { FaFileImport, FaUndoAlt, FaUserPlus, FaPlay } from 'react-icons/fa';
+
 
 const ImportButton = ({ 
   shouldShowTestButton, 
@@ -120,10 +122,9 @@ const ImportButton = ({
     <div className='flex items-center space-x-4 mb-3'>
       <label
         htmlFor='fileInput'
-        className='px-4 py-1 bg-blue-500 text-white font-semibold rounded-md shadow-md hover:bg-blue-600 cursor-pointer transition-all duration-200 text-sm'
-        style={{ display: 'inline-block', textAlign: 'center' }}
+        className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg shadow-md cursor-pointer transition-all duration-200"
       >
-        Import Excel
+        <FaFileImport /> Import
       </label>
       <input
         type='file'
@@ -142,9 +143,9 @@ const ImportButton = ({
       )}
       <button
         onClick={handleResetData}
-        className='px-4 py-1 bg-red-500 text-white font-semibold rounded-md shadow-md hover:bg-red-600 transition-all duration-200 text-sm'
+        className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg shadow-md transition-all duration-200"
       >
-        Reset Data
+        <FaUndoAlt /> Reset
       </button>
     </div>
   );
