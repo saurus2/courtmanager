@@ -459,7 +459,7 @@ function App() {
       )}
       {/* 오른쪽 하단 Copyright 추가 */}
       <div className="absolute bottom-4 right-4 text-blue-300 text-xs">
-        Copyright © 2025 Jihyeok Choi & Jinny Choi
+        Copyright © 2025 Jihyeok Choi
       </div>
     </div>
   );
