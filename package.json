@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "author": "Jihyeok Choi",
-  "main": "main.js",
   "homepage": "./",
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
@@ -22,8 +21,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "build-react": "react-scripts build"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
@@ -42,26 +40,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "build": {
-    "appId": "com.example.courtmanager",
-    "productName": "Court Manager",
-    "directories": {
-      "output": "dist"
-    },
-    "files": [
-      "build/**/*",
-      "main.js",
-      "preload.js"
-    ],
-    "mac": {
-      "category": "public.app-category.utilities"
-    },
-    "win": {
-      "target": "nsis"
-    },
-    "linux": {
-      "target": "AppImage"
-    }
   }
 }
