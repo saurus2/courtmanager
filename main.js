@@ -5,7 +5,7 @@ let mainWindow;
 let tray;
 app.on('ready', () => {
   mainWindow = new BrowserWindow({
-    width: 800, 
+    width: 800,
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -20,10 +20,10 @@ app.on('ready', () => {
   });
   mainWindow.on('close', (event) => {
     if (process.platform === 'darwin') {
-      app.quit(); 
+      app.quit();
     }
   });
-//   mainWindow.webContents.openDevTools();
+  //   mainWindow.webContents.openDevTools();
 });
 app.on('window-all-closed', () => {
   app.quit();

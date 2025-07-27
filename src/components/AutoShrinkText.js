@@ -27,9 +27,8 @@ const AutoShrinkText = ({ text, isSelected }) => {
   return (
     <div
       ref={containerRef}
-      className={`w-full h-full flex items-center justify-center ${
-        isSelected ? 'font-bold border-2 border-white bg-white bg-opacity-20' : ''
-      }`}
+      className={`w-full h-full flex items-center justify-center ${isSelected ? 'font-bold border-2 border-white bg-white bg-opacity-20' : ''
+        }`}
       style={{
         height: '40px',
         padding: '4px',

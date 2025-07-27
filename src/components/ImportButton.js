@@ -4,14 +4,14 @@ import moment from 'moment-timezone';
 import { FaFileImport, FaUndoAlt, FaUserPlus, FaPlay } from 'react-icons/fa';
 
 
-const ImportButton = ({ 
-  shouldShowTestButton, 
-  setPlayers, 
-  setCourts, 
-  currentStartIndex, 
-  setCurrentStartIndex, 
-  isAssignmentCompleted, 
-  setIsAssignmentCompleted 
+const ImportButton = ({
+  shouldShowTestButton,
+  setPlayers,
+  setCourts,
+  currentStartIndex,
+  setCurrentStartIndex,
+  isAssignmentCompleted,
+  setIsAssignmentCompleted
 }) => {
   // ID 생성 함수: 모든 플레이어 리스트에서 ID를 오름차순으로 생성
   function assignSequentialIds(players) {

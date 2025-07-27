@@ -1,31 +1,31 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 
-const SpecialPlayers = forwardRef(({ 
-  specialPlayers, 
-  setSpecialPlayers, 
-  isSpecialEnabled, 
+const SpecialPlayers = forwardRef(({
+  specialPlayers,
+  setSpecialPlayers,
+  isSpecialEnabled,
   setIsSpecialEnabled,
   maxPlayerId
 }, ref) => {
-    const [isLoading, setIsLoading] = useState(true);
-  
-    // ✅ 초기 로딩 시 1회만 실행되도록 수정
-    useEffect(() => {
-        if (isLoading) {
-        const savedSpecialPlayers = localStorage.getItem('specialPlayers');
-        if (savedSpecialPlayers) {
-            setSpecialPlayers(JSON.parse(savedSpecialPlayers));
-        }
-        setIsLoading(false);
-        }
-    }, [isLoading]); // ✅ isLoading 상태 기반으로 실행하여 무한 루프 방지
+  const [isLoading, setIsLoading] = useState(true);
 
-    // ✅ Special List 변경 시 로컬 스토리지에 저장 (불필요한 렌더링 방지)
-    useEffect(() => {
-        if (!isLoading) {
-        localStorage.setItem('specialPlayers', JSON.stringify(specialPlayers));
-        }
-    }, [specialPlayers]); // ✅ 최초 렌더링 후 상태 변경될 때만 저장
+  // 초기 로딩 시 1회만 실행되도록 수정
+  useEffect(() => {
+    if (isLoading) {
+      const savedSpecialPlayers = localStorage.getItem('specialPlayers');
+      if (savedSpecialPlayers) {
+        setSpecialPlayers(JSON.parse(savedSpecialPlayers));
+      }
+      setIsLoading(false);
+    }
+  }, [isLoading]); // isLoading 상태 기반으로 실행하여 무한 루프 방지
+
+  // Special List 변경 시 로컬 스토리지에 저장 (불필요한 렌더링 방지)
+  useEffect(() => {
+    if (!isLoading) {
+      localStorage.setItem('specialPlayers', JSON.stringify(specialPlayers));
+    }
+  }, [specialPlayers]); // 최초 렌더링 후 상태 변경될 때만 저장
 
   // 새 플레이어 추가
   const addSpecialPlayer = () => {
@@ -33,14 +33,14 @@ const SpecialPlayers = forwardRef(({
     if (!playerName || playerName.trim() === '') return;
 
     const maxSpecialId = specialPlayers.reduce((max, player) => {
-        const idNum = parseInt(player.id, 10);
-        return idNum > max ? idNum : max;
+      const idNum = parseInt(player.id, 10);
+      return idNum > max ? idNum : max;
     }, maxPlayerId); // 일반 플레이어의 최대 ID부터 시작
 
     const newPlayer = {
-        id: (maxSpecialId + 1).toString(),
-        name: playerName.trim(),
-        playingCount: 0
+      id: (maxSpecialId + 1).toString(),
+      name: playerName.trim(),
+      playingCount: 0
     };
 
     setSpecialPlayers([...specialPlayers, newPlayer]);

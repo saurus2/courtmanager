@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
-import { MdSportsTennis } from 'react-icons/md'; // ✅ 올바른 테니스공 아이콘 사용
+import { MdSportsTennis } from 'react-icons/md'; // 올바른 테니스공 아이콘 사용
 import { FaRegTrashAlt } from 'react-icons/fa'; // trash bin
 
-function StatusTable({ 
+function StatusTable({
   readOnly,
-  players, 
-  setPlayers, 
-  currentStartIndex, 
-  setCurrentStartIndex, 
-  onSelectPlayer, 
+  players,
+  setPlayers,
+  currentStartIndex,
+  setCurrentStartIndex,
+  onSelectPlayer,
   playingStatus,
-  setPlayingStatus, // ⭐ 추가
+  setPlayingStatus, // 추가
   assignClicked,
   isRollbackAllowed,
   courts,
-  setCourts // ⭐ 추가
+  setCourts // 추가
 }) {
   // The information for view
   const [isModalOpen, setIsModalOpen] = useState(false); // 모달 창 상태
@@ -22,9 +22,9 @@ function StatusTable({
   const [selectedPlayerId, setSelectedPlayerId] = useState(null);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [searchName, setSearchName] = useState(''); // 검색 이름
-  // 🔥🔥🔥 새로 추가: 드래그 중인 플레이어 추적
+  // 새로 추가: 드래그 중인 플레이어 추적
   const [draggedPlayer, setDraggedPlayer] = useState(null);
-  // 🔥🔥🔥 새로 추가: 드래그 상태 추적
+  // 새로 추가: 드래그 상태 추적
   const [isDragging, setIsDragging] = useState(false);
 
   const updatePlayingCount = (playerId, increment) => {
@@ -71,25 +71,25 @@ function StatusTable({
 
   // Click player in the list handler
   const handlePlayerClick = (playerId, e) => {
-    e.stopPropagation(); // 🔴 이벤트 버블링 방지
-    // 🔥🔥🔥 수정됨: 드래그 중에는 클릭 이벤트 무시
+    e.stopPropagation(); // 이벤트 버블링 방지
+    // 수정됨: 드래그 중에는 클릭 이벤트 무시
     if (isDragging) return;
-    // ✅ 이미 선택된 플레이어를 다시 클릭하면 해제
+    // 이미 선택된 플레이어를 다시 클릭하면 해제
     if (selectedPlayerId === playerId) {
       setSelectedPlayerId(null); // 선택 해제
       onSelectPlayer(null); // 상위 컴포넌트에서도 선택 해제
       return;
     }
-    setSelectedPlayerId(playerId); // 🔴 선택된 플레이어 UI 강조
+    setSelectedPlayerId(playerId); // 선택된 플레이어 UI 강조
 
     const selectedPlayer = players.find((player) => player.id === playerId);
-    console.log("📌 StatusTable - 클릭한 플레이어:", selectedPlayer); // 🔴 디버깅용 로그 추가
+    console.log("📌 StatusTable - 클릭한 플레이어:", selectedPlayer); // 디버깅용 로그 추가
 
     if (onSelectPlayer) {
-      console.log("📌 StatusTable - onSelectPlayer 호출됨", selectedPlayer); // 🔴 디버깅용 로그 추가
+      console.log("📌 StatusTable - onSelectPlayer 호출됨", selectedPlayer); // 디버깅용 로그 추가
       onSelectPlayer(selectedPlayer);
     } else {
-      console.log("⚠ StatusTable - onSelectPlayer가 정의되지 않음!"); // 🔴 onSelectPlayer가 없으면 경고 출력
+      console.log("⚠ StatusTable - onSelectPlayer가 정의되지 않음!"); // onSelectPlayer가 없으면 경고 출력
     }
   };
 
@@ -99,7 +99,7 @@ function StatusTable({
       alert('No player selected!');
       return;
     }
-    // ⭐ 추가: 선택된 플레이어가 코트에 배정되어 있는지 확인
+    // 추가: 선택된 플레이어가 코트에 배정되어 있는지 확인
     const isPlayerAssigned = courts.some(court =>
       court.players.some(player => player.id === selectedPlayerId)
     );
@@ -113,13 +113,13 @@ function StatusTable({
       (player) => player.id !== selectedPlayerId
     );
 
-    // ⭐ 추가: 남은 플레이어의 ID를 1부터 순차적으로 재할당
+    // 추가: 남은 플레이어의 ID를 1부터 순차적으로 재할당
     const reindexedPlayers = updatedPlayers.map((player, index) => ({
       ...player,
       id: (index + 1).toString()
     }));
 
-    // ⭐ 추가: courts의 플레이어 ID 업데이트
+    // 추가: courts의 플레이어 ID 업데이트
     const updatedCourts = courts.map(court => ({
       ...court,
       players: court.players.map(player => {
@@ -128,7 +128,7 @@ function StatusTable({
       })
     }));
 
-    // ⭐ 추가: playingStatus의 키를 새로운 ID로 매핑
+    // 추가: playingStatus의 키를 새로운 ID로 매핑
     const updatedPlayingStatus = {};
     Object.keys(playingStatus).forEach(oldId => {
       const player = reindexedPlayers.find(p => p.id === (parseInt(oldId) <= parseInt(selectedPlayerId) ? oldId : (parseInt(oldId) - 1).toString()));
@@ -137,7 +137,7 @@ function StatusTable({
       }
     });
 
-    // ⭐ 수정: currentStartIndex 조정
+    // 수정: currentStartIndex 조정
     const deletedPlayerIndex = players.findIndex((player) => player.id === selectedPlayerId);
     if (deletedPlayerIndex < currentStartIndex) {
       // 삭제된 플레이어가 currentStartIndex보다 앞에 있으면 인덱스 감소
@@ -170,9 +170,9 @@ function StatusTable({
     return date.toLocaleTimeString('en-US', options);
   }
 
-  // 🔥🔥🔥 새로 추가: 드래그 시작 시 호출
+  // 새로 추가: 드래그 시작 시 호출
   const handleDragStart = (e, player) => {
-    // 🔥🔥🔥 수정됨: 드래그 가능 여부 확인 및 이벤트 중단
+    // 수정됨: 드래그 가능 여부 확인 및 이벤트 중단
     if (assignClicked && !isRollbackAllowed) {
       e.preventDefault();
       e.stopPropagation();
@@ -180,21 +180,21 @@ function StatusTable({
       return false;
     }
     setDraggedPlayer(player);
-    setIsDragging(true); // 🔥🔥🔥 수정됨: 드래그 시작 시 상태 설정
+    setIsDragging(true); // 수정됨: 드래그 시작 시 상태 설정
     e.dataTransfer.setData('text/plain', player.id);
     return true;
   };
 
-  // 🔥🔥🔥 새로 추가: 드래그 오버 시 호출
+  // 새로 추가: 드래그 오버 시 호출
   const handleDragOver = (e) => {
-    // 🔥🔥🔥 수정됨: 드래그 가능 여부 확인
+    // 수정됨: 드래그 가능 여부 확인
     if (assignClicked && !isRollbackAllowed) {
       return;
     }
     e.preventDefault();
   };
 
-  // 🔥🔥🔥 새로 추가: 드롭 시 호출
+  // 새로 추가: 드롭 시 호출
   const handleDrop = (e, targetPlayer) => {
     e.preventDefault();
     if (assignClicked && !isRollbackAllowed) {
@@ -219,10 +219,10 @@ function StatusTable({
     setPlayers(updatedPlayers);
     localStorage.setItem('players', JSON.stringify(updatedPlayers));
     setDraggedPlayer(null);
-    setIsDragging(false); // 🔥🔥🔥 수정됨: 드롭 후 드래그 상태 해제
+    setIsDragging(false); // 수정됨: 드롭 후 드래그 상태 해제
   };
-  
-  // 🔥🔥🔥 새로 추가: 드래그 종료 시 호출
+
+  // 새로 추가: 드래그 종료 시 호출
   const handleDragEnd = () => {
     setIsDragging(false);
   };
@@ -240,26 +240,25 @@ function StatusTable({
         <tbody>
           {players.map((player, index) => (
             <tr
-            key={player.id}
-            // Member 모드(readOnly)면 클릭 이벤트 비활성화
-            onClick={readOnly ? undefined : (e) => handlePlayerClick(player.id, e)}
-            className={`${readOnly ? "cursor-default" : "cursor-pointer"} h-12 ${
-              selectedPlayerId === player.id
+              key={player.id}
+              // Member 모드(readOnly)면 클릭 이벤트 비활성화
+              onClick={readOnly ? undefined : (e) => handlePlayerClick(player.id, e)}
+              className={`${readOnly ? "cursor-default" : "cursor-pointer"} h-12 ${selectedPlayerId === player.id
                 ? 'bg-blue-100 border-blue-500'
                 : index % 2 === 0
-                ? 'bg-white hover:bg-blue-200'
-                : 'bg-gray-100 hover:bg-blue-200'
-            }${draggedPlayer?.id === player.id ? ' opacity-50' : ''}`}
-            // 드래그도 Member 모드면 비활성화
-            draggable={!readOnly && !(assignClicked && !isRollbackAllowed)}
-            onDragStart={readOnly ? undefined : (e) => handleDragStart(e, player)}
-            onDragOver={readOnly ? undefined : handleDragOver}
-            onDrop={readOnly ? undefined : (e) => handleDrop(e, player)}
-            onDragEnd={readOnly ? undefined : handleDragEnd}
-          >          
+                  ? 'bg-white hover:bg-blue-200'
+                  : 'bg-gray-100 hover:bg-blue-200'
+                }${draggedPlayer?.id === player.id ? ' opacity-50' : ''}`}
+              // 드래그도 Member 모드면 비활성화
+              draggable={!readOnly && !(assignClicked && !isRollbackAllowed)}
+              onDragStart={readOnly ? undefined : (e) => handleDragStart(e, player)}
+              onDragOver={readOnly ? undefined : handleDragOver}
+              onDrop={readOnly ? undefined : (e) => handleDrop(e, player)}
+              onDragEnd={readOnly ? undefined : handleDragEnd}
+            >
               <td className='px-4 py-2 text-center'>
                 {selectedPlayerId === player.id ? ( // 플레이어 선택 여부에 따라
-                    <button
+                  <button
                     className='px-2 py-1 bg-[#DDA8A0] text-white rounded-md flex items-center justify-center'
                     onClick={(e) => {
                       e.stopPropagation();
@@ -282,9 +281,8 @@ function StatusTable({
                 </div>
               </td>
               <td
-                className={`px-4 py-2 ${
-                  selectedPlayerId === player.id ? '' : 'text-center'
-                }`}
+                className={`px-4 py-2 ${selectedPlayerId === player.id ? '' : 'text-center'
+                  }`}
               >
                 {selectedPlayerId === player.id ? (
                   <div className='flex items-center space-x-2'>
@@ -312,21 +310,6 @@ function StatusTable({
                   <span className='text-center'>{player.playingCount || 0}</span>
                 )}
               </td>
-              {/* <td className='px-4 py-2'>
-                {selectedPlayerId === player.id && (
-                  <div className='flex space-x-2'>
-                    <button
-                      className='px-2 py-1 bg-red-500 text-white rounded-md'
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeSelectedPlayer();
-                      }}
-                    >
-                      -
-                    </button>
-                  </div>
-                )}
-              </td> */}
             </tr>
           ))}
         </tbody>
