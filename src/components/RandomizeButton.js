@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 
 function RandomizeButton({
+  readOnly,
   courts,
   players,
   setPlayers,
@@ -118,6 +119,9 @@ function RandomizeButton({
     // 코트 배치 결과 전달
     onAssignPlayers(courtAssignments);
   }  
+  if (readOnly) {
+    return null;
+  }
   return (
     <button
       className={`px-4 py-2 text-white font-semibold rounded-md shadow-md transition-all duration-200 ${

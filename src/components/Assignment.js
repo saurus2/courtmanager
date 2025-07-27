@@ -5,6 +5,7 @@ import StatusTable from './StatusTable';
 import { FaUndoAlt } from 'react-icons/fa';
 
 function Assignment({ 
+  readOnly,
   numTotCourts, 
   players, 
   setPlayers, 
@@ -426,6 +427,7 @@ function Assignment({
         {courts.map((court, i) => (
           <div key={i}>
             <Court
+              readOnly={readOnly}
               courtIndex={court.courtIndex}
               isSelected={court.isSelected}
               onCourtSelected={() => onCourtSelected(court.courtIndex)}
@@ -439,6 +441,7 @@ function Assignment({
         ))}
       </div>
       <div className='mt-4 flex items-center'>
+      {!readOnly && (
         <RandomizeButton
           courts={courts}
           players={players}
@@ -450,7 +453,9 @@ function Assignment({
           setSpecialPlayers={setSpecialPlayers} // ✅ setSpecialPlayers 전달 추가
           isSpecialEnabled={isSpecialEnabled}
         ></RandomizeButton>
+      )}
         {/* Change Players 버튼 추가 */}
+        {!readOnly && (
         <button
             onClick={handleChangePlayers}
             disabled={!isChangeAllowed} // 🔥 상태를 반영하여 활성화/비활성화
@@ -460,6 +465,7 @@ function Assignment({
         >
           Change Players
         </button>
+        )}
         {isModalOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
@@ -489,6 +495,7 @@ function Assignment({
           </div>
         )}
         {/* Confirmation 버튼 추가 */}
+        {!readOnly && (
         <button
           onClick={handleConfirmAssignments}
           disabled={!assignClicked} // Assign players가 눌리지 않으면 비활성화
@@ -500,7 +507,9 @@ function Assignment({
         >
           Confirmation
         </button>
+        )}
         {/* 🔥🔥🔥 수정됨: Rollback 버튼을 Confirmation 오른쪽에 배치 🔥🔥🔥 */}
+        {!readOnly && (
         <button
           onClick={handleRollback}
           disabled={!isRollbackAllowed}
@@ -512,6 +521,7 @@ function Assignment({
         >
           <FaUndoAlt className="text-lg mr-2" />Back
         </button>
+        )}
       </div>
     </div>
   );

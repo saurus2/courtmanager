@@ -3,6 +3,7 @@ import { MdSportsTennis } from 'react-icons/md'; // ✅ 올바른 테니스공 �
 import { FaRegTrashAlt } from 'react-icons/fa'; // trash bin
 
 function StatusTable({ 
+  readOnly,
   players, 
   setPlayers, 
   currentStartIndex, 
@@ -239,21 +240,23 @@ function StatusTable({
         <tbody>
           {players.map((player, index) => (
             <tr
-              key={player.id}
-              onClick={(e) => handlePlayerClick(player.id, e)}
-              className={`cursor-pointer h-12 ${
-                selectedPlayerId === player.id
-                  ? 'bg-blue-100 border-blue-500'
-                  : index % 2 === 0
-                  ? 'bg-white hover:bg-blue-200'
-                  : 'bg-gray-100 hover:bg-blue-200'
-              }${draggedPlayer?.id === player.id ? 'opacity-50' : ''}`}
-              draggable={!(assignClicked && !isRollbackAllowed)} // 🔥🔥🔥 수정됨: 드래그 가능 여부 제어
-              onDragStart={(e) => handleDragStart(e, player)}
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, player)}
-              onDragEnd={handleDragEnd}// 🔥🔥🔥 수정됨: 드래그 종료 이벤트 추가
-            >
+            key={player.id}
+            // Member 모드(readOnly)면 클릭 이벤트 비활성화
+            onClick={readOnly ? undefined : (e) => handlePlayerClick(player.id, e)}
+            className={`${readOnly ? "cursor-default" : "cursor-pointer"} h-12 ${
+              selectedPlayerId === player.id
+                ? 'bg-blue-100 border-blue-500'
+                : index % 2 === 0
+                ? 'bg-white hover:bg-blue-200'
+                : 'bg-gray-100 hover:bg-blue-200'
+            }${draggedPlayer?.id === player.id ? ' opacity-50' : ''}`}
+            // 드래그도 Member 모드면 비활성화
+            draggable={!readOnly && !(assignClicked && !isRollbackAllowed)}
+            onDragStart={readOnly ? undefined : (e) => handleDragStart(e, player)}
+            onDragOver={readOnly ? undefined : handleDragOver}
+            onDrop={readOnly ? undefined : (e) => handleDrop(e, player)}
+            onDragEnd={readOnly ? undefined : handleDragEnd}
+          >          
               <td className='px-4 py-2 text-center'>
                 {selectedPlayerId === player.id ? ( // 플레이어 선택 여부에 따라
                     <button
