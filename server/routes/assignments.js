@@ -8,12 +8,12 @@ router.post('/', async (req, res) => {
   if (!court_id || !player_id) return res.status(400).send('Missing data');
   try {
     const result = await pool.query(
-      'INSERT INTO court_assignments (court_id, player_id) VALUES ($1, $2) RETURNING *',
+      'INSERT INTO assignments (court_id, player_id) VALUES ($1, $2) RETURNING *',
       [court_id, player_id]
     );
     res.json(result.rows[0]);
   } catch (err) {
-    console.error(err);
+    console.error('Error inserting assignment:', err);
     res.status(500).send('Server error');
   }
 });
@@ -25,14 +25,14 @@ router.get('/', async (req, res) => {
       SELECT a.id, a.assigned_at, 
              c.name as court_name,
              p.name as player_name
-      FROM court_assignments a
+      FROM assignments a
       JOIN courts c ON a.court_id = c.id
       JOIN players p ON a.player_id = p.id
       ORDER BY a.assigned_at DESC
     `);
     res.json(result.rows);
   } catch (err) {
-    console.error(err);
+    console.error('Error fetching assignments:', err);
     res.status(500).send('Server error');
   }
 });
