@@ -21,9 +21,13 @@ function App() {
           path="/admin"
           element={isAdmin ? <AdminPage /> : <Navigate to="/" />}
         />
-        <Route path="/member" element={<MemberPage setIsAdmin={setIsAdmin} />} />
+        <Route
+          path="/member"
+          element={<MemberPage setIsAdmin={setIsAdmin} />}
+        />
       </Routes>
     </Router>
+  
   );
 }
 

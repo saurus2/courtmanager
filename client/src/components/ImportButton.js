@@ -2,7 +2,8 @@ import * as XLSX from 'xlsx';
 import React from 'react';
 import moment from 'moment-timezone';
 import { FaFileImport, FaUndoAlt, FaUserPlus, FaPlay } from 'react-icons/fa';
-
+import axios from 'axios';
+import { fetchPlayers } from '../api';
 
 const ImportButton = ({
   shouldShowTestButton,
@@ -52,11 +53,25 @@ const ImportButton = ({
     return sortedPlayers;
   }
 
+  async function savePlayersToDB(players, setPlayers) {
+    for (const player of players) {
+      await axios.post('http://localhost:4000/api/players', {
+        name: player.name,
+        checkInDate: player.checkInDate || new Date(),
+        playingCount: player.playingCount || 0
+      });
+    }
+    const res = await fetchPlayers();
+    const sorted = res.data.sort((a, b) => a.sort_order - b.sort_order);
+    setPlayers(sorted);
+  }
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (event) => {
+        (async () => {
         const data = new Uint8Array(event.target.result);
         const workbook = XLSX.read(data, { type: 'array' });
         const sheetName = workbook.SheetNames[0];
@@ -69,30 +84,51 @@ const ImportButton = ({
 
         const sortedPlayers = getSortedPlayers(filteredData);
 
-        // 기존 플레이어와 병합 후 ID 재할당
-        setPlayers((prevPlayers) => {
-          const updatedPlayers = assignSequentialIds([
-            ...prevPlayers,
-            ...sortedPlayers
-          ]);
-          localStorage.setItem('players', JSON.stringify(updatedPlayers)); // LocalStorage에 저장
-          // ⭐ 수정: isAssignmentCompleted가 true이고 currentStartIndex가 기존 리스트 범위 내일 때만 첫 번째 새 플레이어로 설정
-          if (isAssignmentCompleted && currentStartIndex < prevPlayers.length && prevPlayers.length > 0) {
-            setCurrentStartIndex(prevPlayers.length);
-          }
-          return updatedPlayers;
-        });
+        // // 기존 플레이어와 병합 후 ID 재할당
+        // setPlayers((prevPlayers) => {
+        //   const updatedPlayers = assignSequentialIds([
+        //     ...prevPlayers,
+        //     ...sortedPlayers
+        //   ]);
+        //   localStorage.setItem('players', JSON.stringify(updatedPlayers)); // LocalStorage에 저장
+        //   // ⭐ 수정: isAssignmentCompleted가 true이고 currentStartIndex가 기존 리스트 범위 내일 때만 첫 번째 새 플레이어로 설정
+        //   if (isAssignmentCompleted && currentStartIndex < prevPlayers.length && prevPlayers.length > 0) {
+        //     setCurrentStartIndex(prevPlayers.length);
+        //   }
+        //   return updatedPlayers;
+        // });
+
+        // 기존 players 길이(추가 전)
+        const previousPlayers = await fetchPlayers();
+        const previousLength = previousPlayers.data.length;
+
+        // DB 저장 + 새 players fetch
+        await savePlayersToDB(sortedPlayers, setPlayers);
+
+        // currentStartIndex 업데이트 (원본 의도 유지)
+        if (
+          isAssignmentCompleted &&
+          currentStartIndex < previousLength &&
+          previousLength > 0
+        ) {
+          setCurrentStartIndex(previousLength);
+        }     
+        })();
       };
       reader.readAsArrayBuffer(file);
     }
   };
 
   // 데이터 초기화
-  const handleResetData = () => {
+  const handleResetData = async () => {
     const confirmReset = window.confirm('Do you want to reset?');
     if (confirmReset) {
-      localStorage.clear(); // LocalStorage 초기화
-      setPlayers([]); // 상태 초기화
+    try {
+      // 서버에 플레이어 전체 삭제 요청
+      await axios.delete('http://localhost:4000/api/players/reset');
+      
+      // 클라이언트 상태 초기화
+      setPlayers([]);
       setCourts((prevCourts) =>
         prevCourts.map((court) => ({
           ...court,
@@ -100,9 +136,17 @@ const ImportButton = ({
           players: []
         }))
       );
-      window.location.reload(); // 페이지 새로고침
+
+      // 필요 시 다른 상태 초기화도 추가 가능
+
+      // 페이지 새로고침
+      window.location.reload();
+    } catch (error) {
+      console.error('Reset failed:', error);
+      alert('Reset failed. Please try again.');
     }
-  };
+  }
+};
 
   const handleTestFile = async () => {
     const response = await fetch('/data/data_01.xlsx');

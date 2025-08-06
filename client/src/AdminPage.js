@@ -7,15 +7,24 @@ import HowToUseButton from './components/HowToUseButton';
 import SpecialPlayers from './components/SpecialPlayers';
 import { FaFileImport, FaUndoAlt, FaUserPlus, FaPlay } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
-
-
+import { fetchPlayers } from "./api";
 
 function AdminPage(props) {
-    // loading data from localStorage when components are mounted
-    const [players, setPlayers] = useState(() => {
-        const savedPlayers = localStorage.getItem('players');
-        return savedPlayers ? JSON.parse(savedPlayers) : [];
-    });
+    const [players, setPlayers] = useState([]);
+
+    useEffect(() => {
+        loadPlayers();
+    }, []);
+
+    async function loadPlayers() {
+    try {
+        const res = await fetchPlayers();
+        const sorted = res.data.sort((a, b) => a.sort_order - b.sort_order);
+        setPlayers(sorted);
+    } catch (err) {
+        console.error("Error fetching players:", err);
+    }
+    }
 
     const [selectedListPlayer, setSelectedListPlayer] = useState(null); // 🔥 App.js에서 관리
     const [playingStatus, setPlayingStatus] = useState(() => {

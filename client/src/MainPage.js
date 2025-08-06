@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUserShield, FaUsers } from "react-icons/fa";
+import { fetchPlayers } from "./api";
 
 function MainPage({ setIsAdmin }) {
   const navigate = useNavigate();

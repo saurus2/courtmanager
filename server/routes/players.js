@@ -29,6 +29,18 @@ router.post('/', async (req, res) => {
   }  
 });
 
+// 플레이어 전체 삭제 (/reset)
+router.delete('/reset', async (req, res) => {
+  try {
+    await db.query('DELETE FROM players');
+    await db.query("SELECT setval(pg_get_serial_sequence('players', 'id'), 1, false)");
+    res.status(200).json({ message: 'All players deleted' });
+  } catch (error) {
+    console.error('Failed to reset players:', error);
+    res.status(500).json({ error: 'Failed to reset players' });
+  }
+});
+
 // 플레이어 삭제
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
