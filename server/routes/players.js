@@ -41,4 +41,57 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// 플레이어 순서 업데이트
+router.put('/order', async (req, res) => {
+  const { players } = req.body; 
+  // players: [{id: 1, sort_order: 0}, {id: 2, sort_order: 1}, ...]
+
+  if (!Array.isArray(players)) {
+    return res.status(400).json({ error: 'players array is required' });
+  }
+
+  const client = await db.connect();
+  try {
+    await client.query('BEGIN');
+    for (const p of players) {
+      await client.query(
+        'UPDATE players SET sort_order = $1 WHERE id = $2',
+        [p.sort_order, p.id]
+      );
+    }
+    await client.query('COMMIT');
+    res.json({ msg: 'Player order updated' });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Update order error:', err);
+    res.status(500).json({ error: err.message });
+  } finally {
+    client.release();
+  }
+});
+
+// 플레이어의 playing_count 업데이트
+router.put('/:id', async (req, res) => {
+  const { id } = req.params;
+  const { playing_count } = req.body;
+
+  if (playing_count === undefined) {
+    return res.status(400).json({ error: 'playing_count is required' });
+  }
+
+  try {
+    const result = await db.query(
+      'UPDATE players SET playing_count = $1 WHERE id = $2 RETURNING *',
+      [playing_count, id]
+    );
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Player not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Update Player Error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

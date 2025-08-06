@@ -3,7 +3,6 @@ const cors = require('cors');
 require('dotenv').config();
 
 const initDB = require('./initDB');
-
 const playersRouter = require('./routes/players');
 const courtsRouter = require('./routes/courts');
 const assignmentsRouter = require('./routes/assignments');
@@ -23,15 +22,8 @@ app.get('/', (req, res) => {
 });
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-const db = require('./db');
-
-db.query('SELECT NOW()')
-  .then(res => console.log('DB Connected:', res.rows[0]))
-  .catch(err => console.error('DB Error:', err));
-
-// DB 테이블 자동 초기화 후 서버 실행
+// DB 초기화 → 서버 시작
 initDB().then(() => {
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 });
