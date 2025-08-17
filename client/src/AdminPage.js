@@ -192,7 +192,7 @@ function AdminPage(props) {
         setNewPlayerName('');
     };
 
-    const addPlayer = () => {
+    const addPlayer = async () => {
         if (!newPlayerName.trim()) {
             alert('Name cannot be empty!');
             return;
@@ -227,6 +227,30 @@ function AdminPage(props) {
             }
             return updatedPlayers;
         });
+
+        // ⭐ DB에도 추가 (백엔드 API 호출)
+        try {
+            const response = await fetch('http://localhost:4000/api/players', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: newPlayer.name,
+                    checkin_date: newPlayer.checkInDate,
+                    playing_count: newPlayer.playingCount
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`DB 저장 실패: ${response.status}`);
+            }
+
+            const savedPlayer = await response.json();
+            console.log("✅ DB에 저장 완료:", savedPlayer);
+
+        } catch (err) {
+            console.error("❌ DB 저장 중 에러:", err);
+        }
+
         closeModal();
     };
 
