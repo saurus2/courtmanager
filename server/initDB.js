@@ -1,40 +1,9 @@
-const { Pool } = require('pg');
 const pool = require('./db');  // courtmanager DB용 pool
 
-async function ensureDatabase() {
-  // postgres DB에 연결해서 데이터베이스 존재 확인
-  const sysPool = new Pool({
-    user: process.env.DB_USER || 'admin',
-    host: process.env.DB_HOST || 'localhost',
-    database: 'postgres', // 시스템 DB
-    password: process.env.DB_PASSWORD || '7824',
-    port: process.env.DB_PORT || 5432,
-  });
-
-  const dbName = 'courtmanager';
-
-  try {
-    const result = await sysPool.query(
-      `SELECT 1 FROM pg_database WHERE datname = $1`,
-      [dbName]
-    );
-    if (result.rowCount === 0) {
-      console.log(`Database ${dbName} not found. Creating...`);
-      await sysPool.query(`CREATE DATABASE ${dbName} OWNER admin`);
-      console.log(`Database ${dbName} created ✅`);
-    } else {
-      console.log(`Database ${dbName} already exists`);
-    }
-  } finally {
-    await sysPool.end();
-  }
-}
-
 async function initDB() {
+  console.log("🔄 [initDB.js] DB 초기화 시작...");
   try {
-    await ensureDatabase();
-
-    // 테이블 생성
+    // users
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -43,7 +12,9 @@ async function initDB() {
         created_at TIMESTAMP DEFAULT NOW()
       );
     `);
+    console.log("✅ [initDB.js] users 테이블 확인/생성 완료");
 
+    // players
     await pool.query(`
       CREATE TABLE IF NOT EXISTS players (
         id SERIAL PRIMARY KEY,
@@ -53,14 +24,18 @@ async function initDB() {
         sort_order INT DEFAULT 0
       );
     `);
+    console.log("✅ [initDB.js] players 테이블 확인/생성 완료");
 
+    // courts
     await pool.query(`
       CREATE TABLE IF NOT EXISTS courts (
         id SERIAL PRIMARY KEY,
         name VARCHAR(100) NOT NULL
       );
     `);
+    console.log("✅ [initDB.js] courts 테이블 확인/생성 완료");
 
+    // assignments
     await pool.query(`
       CREATE TABLE IF NOT EXISTS assignments (
         id SERIAL PRIMARY KEY,
@@ -69,10 +44,12 @@ async function initDB() {
         assigned_at TIMESTAMP DEFAULT NOW()
       );
     `);
+    console.log("✅ [initDB.js] assignments 테이블 확인/생성 완료");
 
-    console.log('DB Tables initialized ✅');
+    console.log("🎉 [initDB.js] 모든 테이블 확인/생성 완료");
   } catch (err) {
-    console.error('DB init error:', err);
+    console.error("❌ [initDB.js] DB init error:", err);
+    throw err;
   }
 }
 
